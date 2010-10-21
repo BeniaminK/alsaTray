@@ -1,0 +1,27 @@
+============================================================================
+                            A L S A   T R A Y
+============================================================================
+  WEBSITE:  http://software.flogisoft.com/alsa-volume/
+  VERSION:  0.1
+  REALISED: Thu, 21 Oct 2010 23:44:37 +0200
+============================================================================
+
+  ALSA Tray provides a tray icon for setting the volume of the ALSA
+  Master mixer
+
+  Dependencies:
+    * PyGTK 2.x <http://pygtk.org/>
+	* pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
+
+  Usage:
+    Juste run alsa-tray
+
+  Install:
+    For install ALSA Tray, run './install.sh --install' as root.
+
+  Uninstall:
+    For uninstall ALSA Tray, run 
+    '/usr/share/alsa-volume-mixer/install.sh --remove' as root.
+
+============================================================================
+
