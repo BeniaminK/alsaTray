@@ -269,6 +269,9 @@ if __name__ == "__main__":
     print(__copyright__)
     #Run
     alsa_volume = ALSATray()
-    gtk.main()
+    try:
+        gtk.main()
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 
