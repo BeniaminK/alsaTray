@@ -123,8 +123,23 @@ class ALSATray(object):
         self.window.set_border_width(3)
         self.window.add(self.slider)
         #Menu
+        menu_mixer0 = gtk.ImageMenuItem("GNOME ALSA Mixer")
+        menu_mixer0_img = gtk.Image()
+        menu_mixer0_img.set_from_icon_name("gtk-preferences", gtk.ICON_SIZE_MENU)
+        menu_mixer0.set_image(menu_mixer0_img)
+        menu_mixer1 = gtk.ImageMenuItem("ALSA Mixer")
+        menu_mixer1_img = gtk.Image()
+        menu_mixer1_img.set_from_icon_name("gtk-preferences", gtk.ICON_SIZE_MENU)
+        menu_mixer1.set_image(menu_mixer1_img)
+        menu_separator = gtk.MenuItem()
         menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.menu = gtk.Menu()
+        if os.path.isfile("/usr/bin/gnome-alsamixer"):
+            self.menu.append(menu_mixer0)
+        if os.path.isfile("/usr/bin/alsamixer") and os.path.isfile("/usr/bin/gnome-terminal"):
+            self.menu.append(menu_mixer1)
+        if os.path.isfile("/usr/bin/gnome-alsamixer") or os.path.isfile("/usr/bin/alsamixer"):
+            self.menu.append(menu_separator)
         self.menu.append(menu_quit)
         #### Signals ####
         #Tray icon
@@ -137,6 +152,16 @@ class ALSATray(object):
         #Window
         self.window.connect("focus-out-event", self.on_window_focus_out_event)
         #Menu
+        menu_mixer0.connect(
+                "activate",
+                self.on_menu_mixer_activate,
+                "gnome-alsamixer &",
+                )
+        menu_mixer1.connect(
+                "activate",
+                self.on_menu_mixer_activate,
+                "gnome-terminal -x alsamixer &",
+                )
         menu_quit.connect("activate", self.quit)
         #### Timer ####
         self._timer = Timer(1000, self._update_infos)
@@ -229,6 +254,9 @@ class ALSATray(object):
 
     def on_window_focus_out_event(self, widget, event):
         self.window.hide()
+
+    def on_menu_mixer_activate(self, widget, command):
+        os.popen(command)
 
     def quit(self, widget, data=None):
         gtk.main_quit()
