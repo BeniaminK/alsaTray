@@ -181,6 +181,7 @@ class ALSATray(object):
                 gtk.ICON_SIZE_MENU,
                 )
         menu_mixer0.set_image(menu_mixer0_img)
+        #
         menu_mixer1 = gtk.ImageMenuItem("ALSA Mixer")
         menu_mixer1_img = gtk.Image()
         menu_mixer1_img.set_from_icon_name(
@@ -188,16 +189,30 @@ class ALSATray(object):
                 gtk.ICON_SIZE_MENU,
                 )
         menu_mixer1.set_image(menu_mixer1_img)
+        #
+        menu_mixer2 = gtk.ImageMenuItem("XFCE4 Mixer")
+        menu_mixer2_img = gtk.Image()
+        menu_mixer2_img.set_from_icon_name(
+                "gtk-preferences",
+                gtk.ICON_SIZE_MENU,
+                )
+        menu_mixer2.set_image(menu_mixer2_img)
+        #
         menu_separator = gtk.MenuItem()
         menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.menu = gtk.Menu()
+        show_separator = False
         if os.path.isfile("/usr/bin/gnome-alsamixer"):
             self.menu.append(menu_mixer0)
+            show_separator = True
         if os.path.isfile("/usr/bin/alsamixer") and \
            os.path.isfile("/usr/bin/gnome-terminal"):
             self.menu.append(menu_mixer1)
-        if os.path.isfile("/usr/bin/gnome-alsamixer") or \
-           os.path.isfile("/usr/bin/alsamixer"):
+            show_separator = True
+        if os.path.isfile("/usr/bin/xfce4-mixer"):
+            self.menu.append(menu_mixer2)
+            show_separator = True
+        if show_separator:
             self.menu.append(menu_separator)
         self.menu.append(menu_quit)
         #### Signals ####
@@ -225,6 +240,11 @@ class ALSATray(object):
                 "activate",
                 self.on_menu_mixer_activate,
                 "gnome-terminal -x alsamixer &",
+                )
+        menu_mixer2.connect(
+                "activate",
+                self.on_menu_mixer_activate,
+                "xfce4-mixer &",
                 )
         menu_quit.connect("activate", self.quit)
         #### Timer ####
