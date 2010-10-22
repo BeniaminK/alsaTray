@@ -155,6 +155,7 @@ class ALSATray(object):
     """The Alsa Volume tray icon"""
 
     def __init__(self):
+        self.handle_menu_mute = True
         #### Widgets ####
         #Tray icon
         self.tray_icon = gtk.StatusIcon()
@@ -174,6 +175,10 @@ class ALSATray(object):
         self.window.set_border_width(3)
         self.window.add(self.slider)
         #Menu
+        self.menu_mute = gtk.CheckMenuItem("Mute")
+        #
+        separator0 = gtk.MenuItem()
+        #
         menu_mixer0 = gtk.ImageMenuItem("GNOME ALSA Mixer")
         menu_mixer0_img = gtk.Image()
         menu_mixer0_img.set_from_icon_name(
@@ -198,22 +203,26 @@ class ALSATray(object):
                 )
         menu_mixer2.set_image(menu_mixer2_img)
         #
-        menu_separator = gtk.MenuItem()
+        menu_separator1 = gtk.MenuItem()
+        #
         menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        #
         self.menu = gtk.Menu()
-        show_separator = False
+        self.menu.append(self.menu_mute)
+        self.menu.append(separator0)
+        show_separator1 = False
         if os.path.isfile("/usr/bin/gnome-alsamixer"):
             self.menu.append(menu_mixer0)
-            show_separator = True
+            show_separator1 = True
         if os.path.isfile("/usr/bin/alsamixer") and \
            os.path.isfile("/usr/bin/gnome-terminal"):
             self.menu.append(menu_mixer1)
-            show_separator = True
+            show_separator1 = True
         if os.path.isfile("/usr/bin/xfce4-mixer"):
             self.menu.append(menu_mixer2)
-            show_separator = True
-        if show_separator:
-            self.menu.append(menu_separator)
+            show_separator1 = True
+        if show_separator1:
+            self.menu.append(menu_separator1)
         self.menu.append(menu_quit)
         #### Signals ####
         #Tray icon
@@ -231,6 +240,7 @@ class ALSATray(object):
         #### MM Keys ####
         mmkeys = MMKeys(self)
         #Menu
+        self.menu_mute.connect("activate", self.on_menu_mute_activate)
         menu_mixer0.connect(
                 "activate",
                 self.on_menu_mixer_activate,
@@ -260,9 +270,15 @@ class ALSATray(object):
         if mute:
             icon_index = len(VOL_ICON) - 1
             self.tray_icon.set_tooltip("Volume: mute")
+            self.handle_menu_mute = False
+            self.menu_mute.set_active(True)
+            self.handle_menu_mute = True
         else:
             icon_index = int((100 - volume) * (len(VOL_ICON) - 1) / 100)
             self.tray_icon.set_tooltip("Volume: %i%%" % volume)
+            self.handle_menu_mute = False
+            self.menu_mute.set_active(False)
+            self.handle_menu_mute = True
         self.tray_icon.set_from_icon_name(VOL_ICON[icon_index])
         #Slider
         self.slider.set_value(volume)
@@ -364,6 +380,10 @@ class ALSATray(object):
 
     def on_window_focus_out_event(self, widget, event):
         self.window.hide()
+
+    def on_menu_mute_activate(self, widget):
+        if self.handle_menu_mute:
+            self._toggle_mute(False)
 
     def on_menu_mixer_activate(self, widget, command):
         os.popen(command)
