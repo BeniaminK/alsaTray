@@ -12,6 +12,8 @@
   Dependencies:
     * PyGTK 2.x <http://pygtk.org/>
 	* pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
+	* pyNotify <http://www.galago-project.org/>
+	* DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
 
   Usage:
     Juste run alsa-tray

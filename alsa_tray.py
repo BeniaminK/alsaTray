@@ -43,6 +43,9 @@ import gobject
 import gtk
 import pygtk
 pygtk.require('2.0')
+import dbus
+from dbus.mainloop.glib import DBusGMainLoop
+import pynotify
 
 
 MIXER = "Master"
@@ -52,6 +55,13 @@ VOL_ICON = [
         "audio-volume-medium-panel", # > 33%
         "audio-volume-low-panel",    # > 0%
         "audio-volume-muted-panel",  # = 0%
+        ]
+
+OSD_ICON = [
+        "notification-audio-volume-high",   # > 66%
+        "notification-audio-volume-medium", # > 33%
+        "notification-audio-volume-low",    # > 0%
+        "notification-audio-volume-muted",  # = 0%
         ]
 
 
@@ -99,6 +109,47 @@ class Timer(object):
             self._callback(*self._args, **self._kwargs)
 
 
+class MMKeys(object):
+
+    """Handle multimedia keys via dbus/Hal
+
+    This class comes originally from the Volti project
+    <http://code.google.com/p/volti/>
+    """
+
+    def __init__(self, main_instance):
+        """Constructor"""
+        loop = DBusGMainLoop()
+        self.main = main_instance
+        bus = dbus.SystemBus(mainloop=loop)
+        for udi in self.get_inputs():
+            obj = bus.get_object("org.freedesktop.Hal", udi)
+            iface = dbus.Interface(obj, "org.freedesktop.Hal.Device")
+            iface.connect_to_signal(
+                    "Condition",
+                    self.button_handler,
+                    path_keyword="path",
+                    )
+
+    def hal_manager(self):
+        """Hal manager"""
+        bus = dbus.SystemBus()
+        obj = bus.get_object(
+                "org.freedesktop.Hal",
+                "/org/freedesktop/Hal/Manager",
+                )
+        return dbus.Interface(obj, "org.freedesktop.Hal.Manager")
+
+    def get_inputs(self):
+        """Get keys"""
+        return self.hal_manager().FindDeviceByCapability("input.keys")
+
+    def button_handler(self, sender, destination, path):
+        """Handle button events and pass them to main app"""
+        if sender == "ButtonPressed":
+            self.main.on_mmkey_pressed(destination)
+
+
 class ALSATray(object):
 
     """The Alsa Volume tray icon"""
@@ -125,32 +176,45 @@ class ALSATray(object):
         #Menu
         menu_mixer0 = gtk.ImageMenuItem("GNOME ALSA Mixer")
         menu_mixer0_img = gtk.Image()
-        menu_mixer0_img.set_from_icon_name("gtk-preferences", gtk.ICON_SIZE_MENU)
+        menu_mixer0_img.set_from_icon_name(
+                "gtk-preferences",
+                gtk.ICON_SIZE_MENU,
+                )
         menu_mixer0.set_image(menu_mixer0_img)
         menu_mixer1 = gtk.ImageMenuItem("ALSA Mixer")
         menu_mixer1_img = gtk.Image()
-        menu_mixer1_img.set_from_icon_name("gtk-preferences", gtk.ICON_SIZE_MENU)
+        menu_mixer1_img.set_from_icon_name(
+                "gtk-preferences",
+                gtk.ICON_SIZE_MENU,
+                )
         menu_mixer1.set_image(menu_mixer1_img)
         menu_separator = gtk.MenuItem()
         menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.menu = gtk.Menu()
         if os.path.isfile("/usr/bin/gnome-alsamixer"):
             self.menu.append(menu_mixer0)
-        if os.path.isfile("/usr/bin/alsamixer") and os.path.isfile("/usr/bin/gnome-terminal"):
+        if os.path.isfile("/usr/bin/alsamixer") and \
+           os.path.isfile("/usr/bin/gnome-terminal"):
             self.menu.append(menu_mixer1)
-        if os.path.isfile("/usr/bin/gnome-alsamixer") or os.path.isfile("/usr/bin/alsamixer"):
+        if os.path.isfile("/usr/bin/gnome-alsamixer") or \
+           os.path.isfile("/usr/bin/alsamixer"):
             self.menu.append(menu_separator)
         self.menu.append(menu_quit)
         #### Signals ####
         #Tray icon
         self.tray_icon.connect("activate", self.on_tray_icon_activate)
-        self.tray_icon.connect("button-release-event", self.on_tray_icon_button_release_event)
+        self.tray_icon.connect(
+                "button-release-event",
+                self.on_tray_icon_button_release_event,
+                )
         self.tray_icon.connect("scroll-event", self.on_tray_icon_scroll_event)
         self.tray_icon.connect("popup-menu", self.on_tray_icon_popup_menu)
         #Slider
         self.slider.connect("value-changed", self.on_slider_value_changed)
         #Window
         self.window.connect("focus-out-event", self.on_window_focus_out_event)
+        #### MM Keys ####
+        mmkeys = MMKeys(self)
         #Menu
         menu_mixer0.connect(
                 "activate",
@@ -203,6 +267,54 @@ class ALSATray(object):
         #Move window
         self.window.move(win_x, win_y)
 
+    def _set_volume(self, value, notify=False):
+        #Mixer
+        mixer = alsaaudio.Mixer(control=MIXER)
+        volume = mixer.getvolume()[0]
+        #Calculate the new volume
+        volume = volume + value
+        if volume > 100:
+            volume = 100
+        elif volume < 0:
+            volume = 0
+        #Show notification
+        if notify:
+            self._notify(volume)
+        #Set the volume
+        mixer.setvolume(volume)
+        #Update information
+        self._update_infos()
+
+    def _toggle_mute(self, notify=False):
+        #Mixer
+        mixer = alsaaudio.Mixer(control=MIXER)
+        #Mute/Unmute
+        if mixer.getmute()[0]:
+            mixer.setmute(False)
+        else:
+            mixer.setmute(True)
+        #Show notification
+        if notify:
+            if mixer.getmute()[0]:
+                self._notify(0)
+            else:
+                self._notify(mixer.getvolume()[0])
+        #Update infos
+        self._update_infos()
+
+    def _notify(self, value):
+        #Select icon
+        icon_index = int((100 - value) * (len(OSD_ICON) - 1) / 100)
+        #Notify
+        notification = pynotify.Notification(
+                "Volume",
+                "",
+                OSD_ICON[icon_index],
+                )
+        notification.set_hint_int32("value", value);
+        notification.set_hint_string("x-canonical-private-synchronous", "")
+        notification.show()
+
     def on_tray_icon_activate(self, widget):
         if self.window.get_visible():
             self.window.hide()
@@ -212,35 +324,13 @@ class ALSATray(object):
 
     def on_tray_icon_button_release_event(self, widget, event):
         if event.button == 2: #Middle click
-            #Mixer
-            mixer = alsaaudio.Mixer(control=MIXER)
-            #Mute/Unmute
-            if mixer.getmute()[0]:
-                mixer.setmute(False)
-            else:
-                mixer.setmute(True)
-            #Update infos
-            self._update_infos()
+            self._toggle_mute(False)
 
     def on_tray_icon_scroll_event(self, widget, event):
-        #Mixer
-        mixer = alsaaudio.Mixer(control=MIXER)
-        volume = mixer.getvolume()[0]
-        #Calculate the new volume
         if event.direction == gtk.gdk.SCROLL_UP:
-            volume = volume + 5
-            mixer.setmute(False)
+            self._set_volume(+5, False)
         elif event.direction == gtk.gdk.SCROLL_DOWN:
-            volume = volume - 5
-            mixer.setmute(False)
-        if volume > 100:
-            volume = 100
-        elif volume < 0:
-            volume = 0
-        #Set the volume
-        mixer.setvolume(volume)
-        #Update information
-        self._update_infos()
+            self._set_volume(-5, False)
 
     def on_tray_icon_popup_menu(self, widget, button, time):
         self.menu.show_all()
@@ -260,6 +350,14 @@ class ALSATray(object):
 
     def quit(self, widget, data=None):
         gtk.main_quit()
+
+    def on_mmkey_pressed(self, key):
+        if key == "volume-up":
+            self._set_volume(+5, True)
+        elif key == "volume-down":
+            self._set_volume(-5, True)
+        elif key == "mute":
+            self._toggle_mute(True)
 
 
 if __name__ == "__main__":
