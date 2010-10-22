@@ -25,7 +25,7 @@
 
 """provides a tray icon for setting the volume of the ALSA Master mixer"""
 
-__version__ = "0.1"
+__version__ = "0.2"
 __author__ = "Fabien Loison <flo@flogisoft.com>"
 __copyright__ = "Copyright © 2010 Fabien LOISON"
 __appname__ = "ALSA Tray"

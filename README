@@ -2,8 +2,8 @@
                             A L S A   T R A Y
 ============================================================================
   WEBSITE:  http://software.flogisoft.com/alsa-tray/
-  VERSION:  0.1
-  REALISED: Thu, 21 Oct 2010 23:44:37 +0200
+  VERSION:  0.2
+  REALISED:Fri, 22 Oct 2010 17:05:32 +0200 
 ============================================================================
 
   ALSA Tray provides a tray icon for setting the volume of the ALSA
@@ -22,8 +22,7 @@
     For install ALSA Tray, run './install.sh --install' as root.
 
   Uninstall:
-    For uninstall ALSA Tray, run 
-    '/usr/share/alsa-volume-mixer/install.sh --remove' as root.
+    For uninstall ALSA Tray, run './install.sh --remove' as root.
 
 ============================================================================
 
