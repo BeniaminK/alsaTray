@@ -21,18 +21,15 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.  ##
 ##                                                                        ##
 ############################################################################
-##                                                                        ##
-## WEB SITE : http://software.flogisoft.com/alsa-volume/                  ##
-##                                                                       ##
-#########################################################################
 
 
 """provides a tray icon for setting the volume of the ALSA Master mixer"""
 
 __version__ = "0.1"
 __author__ = "Fabien Loison <flo@flogisoft.com>"
-__copyright__ = "Copyright © 2009 - 2010 Fabien LOISON"
-__appname__ = "alsa-tray"
+__copyright__ = "Copyright © 2010 Fabien LOISON"
+__appname__ = "ALSA Tray"
+__website__ = "http://software.flogisoft.com/alsa-tray/"
 
 
 import sys
@@ -205,6 +202,8 @@ class ALSATray(object):
         #
         menu_separator1 = gtk.MenuItem()
         #
+        menu_about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+        #
         menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         #
         self.menu = gtk.Menu()
@@ -223,6 +222,7 @@ class ALSATray(object):
             show_separator1 = True
         if show_separator1:
             self.menu.append(menu_separator1)
+        self.menu.append(menu_about)
         self.menu.append(menu_quit)
         #### Signals ####
         #Tray icon
@@ -256,9 +256,10 @@ class ALSATray(object):
                 self.on_menu_mixer_activate,
                 "xfce4-mixer &",
                 )
-        menu_quit.connect("activate", self.quit)
+        menu_about.connect("activate", self.on_menu_about_activate)
+        menu_quit.connect("activate", self.on_menu_quit_activate)
         #### Timer ####
-        self._timer = Timer(1000, self._update_infos)
+        self._timer = Timer(800, self._update_infos)
         self._timer.start()
 
     def _update_infos(self):
@@ -388,8 +389,24 @@ class ALSATray(object):
     def on_menu_mixer_activate(self, widget, command):
         os.popen(command)
 
-    def quit(self, widget, data=None):
+    def on_menu_quit_activate(self, widget):
         gtk.main_quit()
+
+    def on_menu_about_activate(self, widget):
+        aboutdlg = gtk.AboutDialog()
+        aboutdlg.set_name(__appname__)
+        aboutdlg.set_version(__version__)
+        aboutdlg.set_copyright(__copyright__)
+        aboutdlg.set_comments(__doc__)
+        aboutdlg.set_website(__website__)
+        aboutdlg.set_logo_icon_name(VOL_ICON[0])
+        aboutdlg.set_icon_name(VOL_ICON[0])
+        aboutdlg.connect("response", self.on_aboutdlg_response)
+        aboutdlg.show()
+
+    def on_aboutdlg_response(self, widget, response):
+        if response < 0:
+            widget.destroy()
 
     def on_mmkey_pressed(self, key):
         if key == "volume-up":
@@ -402,7 +419,7 @@ class ALSATray(object):
 
 if __name__ == "__main__":
     #Show infos
-    print("ALSA Tray - %s\n" % __doc__)
+    print("%s - %s\n" % (__appname__, __doc__))
     print("Version: %s" % __version__)
     print(__copyright__)
     #Run
