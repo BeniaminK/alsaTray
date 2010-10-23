@@ -88,7 +88,7 @@ EXAMPLE:
         alsa-tray --debug --mixer=Master
 """
 
-__version__ = "0.2"
+__version__ = "0.3"
 __author__ = "Fabien Loison <flo@flogisoft.com>"
 __copyright__ = "Copyright © 2010 Fabien LOISON"
 __appname__ = "ALSA Tray"
