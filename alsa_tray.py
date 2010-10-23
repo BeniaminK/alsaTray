@@ -647,8 +647,10 @@ if __name__ == "__main__":
         else:
             notify(volume, default=False)
         #Print infos
-        print("Volume: %i%%" % volume)
-        print("Muted:  %s" % mute)
+        if mute:
+            print("Volume: %i%%, muted" % volume)
+        else:
+            print("Volume: %i%%" % volume)
     if GUI or not CLI:
         if not PYGTK:
             print("E: Can't run in systray: pyGTK is not available.")
