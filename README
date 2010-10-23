@@ -11,11 +11,19 @@
 
   Dependencies:
     * [Needed  ] pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
+
     * [Optional] PyGTK 2.x <http://pygtk.org/>
                  NOTE: PyGTK is optional for using ALSA Tray with CLI, but
                  it is needed for having a systray icon.
+
     * [Optional] DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
+	             NOTE: Needed for the support of multimedia keys.
+
+	* [Optional] HAL <http://www.freedesktop.org/wiki/Software/hal>
+	             NOTE: Needed for the support of multimedia keys.
+
     * [Optional] pyNotify <http://www.galago-project.org/>
+	             NOTE: Needed for the notifications.
 
   Usage:
     run 'alsa-tray' for launching ALSA Tray in systray
