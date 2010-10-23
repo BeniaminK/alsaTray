@@ -33,7 +33,7 @@ SYNOPSIS:
 
 USAGE:
     * Run in systray:
-        alsa-tray
+        alsa-tray, alsa-tray --tray, +tray
 
     * Change the volume:
         * Increase volume:
@@ -86,6 +86,8 @@ EXAMPLE:
         alsa-tray +mute
     * Launch in systray with debugging infos and "Master" mixer selected:
         alsa-tray --debug --mixer=Master
+    * Launch in systray and set the volume to 80% and muted:
+        alsa-tray +tray +mute 80
 """
 
 __version__ = "0.3"
@@ -142,6 +144,7 @@ OSD_ICON = [
 
 DEBUG = False
 CLI = False
+GUI = False
 CLI_OPTS = {
         'volume': "+0",
         'mute': "none",
@@ -454,10 +457,11 @@ class ALSATray(object):
         self.menu.popup(None, None, None, button, time)
 
     def on_slider_value_changed(self, widget):
-        mixer = alsaaudio.Mixer(control=MIXER)
-        mixer.setmute(False)
-        mixer.setvolume(int(self.slider.get_value()))
-        self._update_infos()
+        if self.window.get_visible():
+            mixer = alsaaudio.Mixer(control=MIXER)
+            mixer.setmute(False)
+            mixer.setvolume(int(self.slider.get_value()))
+            self._update_infos()
 
     def on_window_focus_out_event(self, widget, event):
         self.window.hide()
@@ -526,7 +530,11 @@ def notify(value, default=True):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv)):
-            if sys.argv[i] in ("+debug", "--debug"):
+            if sys.argv[i] in ("+tray", "--tray"):
+                GUI = True
+            elif sys.argv[i] ==  "-tray":
+                GUI = False
+            elif sys.argv[i] in ("+debug", "--debug"):
                 DEBUG = True
             elif sys.argv[i] == "-debug":
                 DEBUG = False
@@ -641,7 +649,7 @@ if __name__ == "__main__":
         #Print infos
         print("Volume: %i%%" % volume)
         print("Muted:  %s" % mute)
-    else:
+    if GUI or not CLI:
         if not PYGTK:
             print("E: Can't run in systray: pyGTK is not available.")
             sys.exit(4)

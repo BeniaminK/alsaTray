@@ -17,6 +17,12 @@ alsa\-tray \- provides a systray icon for setting ALSA mixers volume
 Provides a systray icon and a command line interface for setting the
 volume of the ALSA Mixers.
 
+.SS Run in systray:
+.RI alsa-tray
+.RS 0
+.RI alsa-tray " \-\-tray", " +tray
+
+
 .SS Change the volume:
 .TP 4
 * Increase volume:
@@ -80,6 +86,8 @@ alsa\-tray +notify 42
 alsa\-tray +mute
 .SS Launch in systray with debugging infos and 'Master' mixer selected:
 alsa\-tray \-\-debug \-\-mixer=Master
+.SS Launch in systray and set the volume to 80% and muted:
+alsa-tray +tray +mute 80
 
 
 .SH WEB SITE
