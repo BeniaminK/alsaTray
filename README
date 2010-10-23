@@ -6,16 +6,16 @@
   REALISED:Fri, 22 Oct 2010 17:05:32 +0200 
 ============================================================================
 
-  ALSA Tray provides a tray icon for setting the volume of the ALSA
-  Master mixer
+  ALSA Tray Provides a systray icon and a command line interface for
+  setting the volume of the ALSA Mixers.
 
   Dependencies:
-	* [Needed  ] pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
+    * [Needed  ] pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
     * [Optional] PyGTK 2.x <http://pygtk.org/>
-	  PyGTK is optional for using ALSA Tray with CLI, but it is needed for
-	  having a systray icon.
-	* [Optional] DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
-	* [Optional] pyNotify <http://www.galago-project.org/>
+                 NOTE: PyGTK is optional for using ALSA Tray with CLI, but
+                 it is needed for having a systray icon.
+    * [Optional] DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
+    * [Optional] pyNotify <http://www.galago-project.org/>
 
   Usage:
     run 'alsa-tray' for launching ALSA Tray in systray
@@ -28,4 +28,3 @@
     For uninstall ALSA Tray, run './install.sh --remove' as root.
 
 ============================================================================
-

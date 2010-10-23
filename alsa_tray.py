@@ -3,7 +3,7 @@
 
 ############################################################################
 ##                                                                        ##
-## ALSA Tray - provides a tray icon for setting ALSA volume               ##
+## ALSA Tray - provides a tray icon for setting ALSA mixers volume        ##
 ##                                                                        ##
 ## Copyright (C) 2010  Fabien Loison (flo@flogisoft.com)                  ##
 ##                                                                        ##
@@ -23,7 +23,8 @@
 ############################################################################
 
 
-"""Provides a tray icon for setting the volume of the ALSA Master Mixer.
+"""Provides a systray icon and a command line interface for setting the
+volume of the ALSA Mixers.
 
 SYNOPSIS:
     alsa-tray [options]
@@ -51,7 +52,19 @@ USAGE:
         * Toggle mute/Unmute
             alsa-tray mute
 
+    * Liste of available mixers
+        alsa-tray --mixer-list
+
+    * Help (this what you are reading)
+        alsa-tray --help, -h, -?
+
 OPTIONS:
+    * Select mixer:
+        --mixer=<MixerName>
+        where <MixerName> is the name of the mixer.
+        The default mixer is 'Master'. The list of available mixers can
+        be obtained with 'alsa-tray --mixer-list'.
+
     * Notifications (enable/disable notifications)
         +notify 
             Enable notifications
@@ -59,7 +72,7 @@ OPTIONS:
              Disable notifications
 
     * Debug mode (gives more information when an error occur)
-        +debug
+        +debug, --debug
             Enable debug mode
         -debug
             Disable debug mode
@@ -71,8 +84,8 @@ EXAMPLE:
         alsa-tray +notify 42
     * Mute the volume:
         alsa-tray +mute
-    * Launch in systray with debugging informations:
-        alsa-tray --debug
+    * Launch in systray with debugging infos and "Master" mixer selected:
+        alsa-tray --debug --mixer=Master
 """
 
 __version__ = "0.2"
@@ -513,7 +526,7 @@ def notify(value, default=True):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv)):
-            if sys.argv[i] == "+debug":
+            if sys.argv[i] in ("+debug", "--debug"):
                 DEBUG = True
             elif sys.argv[i] == "-debug":
                 DEBUG = False
@@ -531,7 +544,7 @@ if __name__ == "__main__":
                 CLI_OPTS['mute'] = "unmute"
                 CLI = True
             elif len(sys.argv[i]) >= 1 and len(sys.argv[i]) <= 4 and \
-                 (sys.argv[i][0] == "+" or sys.argv[i][0] == "-") and \
+                 (sys.argv[i][0] in ("+", "-")) and \
                  sys.argv[i][1:].isdigit() and int(sys.argv[i][1:]) >= 0 and \
                  int(sys.argv[i][1:]) <= 100:
                 CLI_OPTS['volume'] = sys.argv[i]
@@ -540,10 +553,24 @@ if __name__ == "__main__":
                  int(sys.argv[i]) <= 100:
                 CLI_OPTS['volume'] = sys.argv[i]
                 CLI = True
-            elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
+            elif sys.argv[i][:8] == "--mixer=" and sys.argv[i][8:].isalnum():
+                MIXER = sys.argv[i][8:]
+            elif sys.argv[i] in ("--mixer-list", "--mixers-list",
+                 "--list-mixer", "--list-mixers"):
+                if ALSAAUDIO:
+                    print("Available mixers:")
+                    for mixer_name in alsaaudio.mixers():
+                        if mixer_name.find(" ") == -1:
+                            print("  * %s" % mixer_name)
+                    sys.exit(0)
+                else:
+                    print("E: pyAlsaAudio is not available")
+                    sys.exit(2)
+            elif sys.argv[i] in ("-h", "--help", "-?"):
                 print("%s %s" % (__appname__, __version__))
                 print(__doc__)
-                print("COPYRIGHT:\n    %s" % __copyright__)
+                print("COPYRIGHT:\n    %s\n" % __copyright__)
+                print("WEB SITE:\n    %s" % __website__)
                 exit(0)
             else:
                 print("E: Invalide option '%s'." % sys.argv[i])
@@ -574,6 +601,11 @@ if __name__ == "__main__":
     if not ALSAAUDIO:
        print("E: pyAlsaAudio is not available")
        sys.exit(2)
+
+    if not MIXER in alsaaudio.mixers():
+       print("E: Unknown mixer '%s'." % MIXER)
+       print("Run asla-tray --mixer-list for seeing the available mixers.")
+       sys.exit(3)
 
     if CLI:
         #Mixer
@@ -612,7 +644,7 @@ if __name__ == "__main__":
     else:
         if not PYGTK:
             print("E: Can't run in systray: pyGTK is not available.")
-            sys.exit(3)
+            sys.exit(4)
         alsa_volume = ALSATray()
         try:
             gtk.main()
