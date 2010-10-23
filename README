@@ -10,13 +10,16 @@
   Master mixer
 
   Dependencies:
-    * PyGTK 2.x <http://pygtk.org/>
-	* pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
-	* pyNotify <http://www.galago-project.org/>
-	* DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
+	* [Needed  ] pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
+    * [Optional] PyGTK 2.x <http://pygtk.org/>
+	  PyGTK is optional for using ALSA Tray with CLI, but it is needed for
+	  having a systray icon.
+	* [Optional] DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
+	* [Optional] pyNotify <http://www.galago-project.org/>
 
   Usage:
-    Juste run alsa-tray
+    run 'alsa-tray' for launching ALSA Tray in systray
+    run 'alsa-tray --help' for help with CLI otions
 
   Install:
     For install ALSA Tray, run './install.sh --install' as root.

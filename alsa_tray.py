@@ -23,7 +23,57 @@
 ############################################################################
 
 
-"""provides a tray icon for setting the volume of the ALSA Master mixer"""
+"""Provides a tray icon for setting the volume of the ALSA Master Mixer.
+
+SYNOPSIS:
+    alsa-tray [options]
+    alsa-tray [options] [+|-]<Value>
+    alsa-tray [options] [+|-]mute
+
+USAGE:
+    * Run in systray:
+        alsa-tray
+
+    * Change the volume:
+        * Increase volume:
+            alsa-tray +<value>
+        * Decrease volume:
+            alsa-tray -<value>
+        * Set volume to a specific value:
+            alsa-tray <value>
+        where <value> is a number between 0 and 100.
+
+    * Mute/Unmute the volume:
+        * Mute:
+            alsa-tray +mute
+        * Unmute:
+            alsa-tray -mute
+        * Toggle mute/Unmute
+            alsa-tray mute
+
+OPTIONS:
+    * Notifications (enable/disable notifications)
+        +notify 
+            Enable notifications
+        -notify
+             Disable notifications
+
+    * Debug mode (gives more information when an error occur)
+        +debug
+            Enable debug mode
+        -debug
+            Disable debug mode
+
+EXAMPLE:
+    * Increase the volume of 5%:
+        alsa-tray +5
+    * Set volume to 42% and show a notification:
+        alsa-tray +notify 42
+    * Mute the volume:
+        alsa-tray +mute
+    * Launch in systray with debugging informations:
+        alsa-tray --debug
+"""
 
 __version__ = "0.2"
 __author__ = "Fabien Loison <flo@flogisoft.com>"
@@ -35,14 +85,30 @@ __website__ = "http://software.flogisoft.com/alsa-tray/"
 import sys
 import os
 
-import alsaaudio
-import gobject
-import gtk
-import pygtk
-pygtk.require('2.0')
-import dbus
-from dbus.mainloop.glib import DBusGMainLoop
-import pynotify
+try:
+    import alsaaudio
+    ALSAAUDIO = True
+except ImportError:
+    ALSAAUDIO = False
+try:
+    import gobject
+    import gtk
+    import pygtk
+    pygtk.require("2.0")
+    PYGTK = True
+except ImportError:
+    PYGTK = False
+try:
+    import dbus
+    from dbus.mainloop.glib import DBusGMainLoop
+    DBUS = True
+except ImportError:
+    DBUS = False
+try:
+    import pynotify
+    NOTIFY = True
+except ImportError:
+    NOTIFY = False
 
 
 MIXER = "Master"
@@ -61,6 +127,13 @@ OSD_ICON = [
         "notification-audio-volume-muted",  # = 0%
         ]
 
+DEBUG = False
+CLI = False
+CLI_OPTS = {
+        'volume': "+0",
+        'mute': "none",
+        'notify': "none"
+        }
 
 class Timer(object):
 
@@ -238,7 +311,14 @@ class ALSATray(object):
         #Window
         self.window.connect("focus-out-event", self.on_window_focus_out_event)
         #### MM Keys ####
-        mmkeys = MMKeys(self)
+        if DBUS:
+            try:
+                MMKeys(self)
+            except dbus.exceptions.DBusException, detail:
+                if DEBUG:
+                    print("W: Multimedia key support non available:\n%s" % detail)
+                else:
+                    print("W: Multimedia key support non available...")
         #Menu
         self.menu_mute.connect("activate", self.on_menu_mute_activate)
         menu_mixer0.connect(
@@ -316,7 +396,7 @@ class ALSATray(object):
             volume = 0
         #Show notification
         if notify:
-            self._notify(volume)
+            notify(volume)
         #Set the volume
         mixer.setvolume(volume)
         #Update information
@@ -333,24 +413,11 @@ class ALSATray(object):
         #Show notification
         if notify:
             if mixer.getmute()[0]:
-                self._notify(0)
+                notify(0)
             else:
-                self._notify(mixer.getvolume()[0])
+                notify(mixer.getvolume()[0])
         #Update infos
         self._update_infos()
-
-    def _notify(self, value):
-        #Select icon
-        icon_index = int((100 - value) * (len(OSD_ICON) - 1) / 100)
-        #Notify
-        notification = pynotify.Notification(
-                "Volume",
-                "",
-                OSD_ICON[icon_index],
-                )
-        notification.set_hint_int32("value", value);
-        notification.set_hint_string("x-canonical-private-synchronous", "")
-        notification.show()
 
     def on_tray_icon_activate(self, widget):
         if self.window.get_visible():
@@ -397,7 +464,6 @@ class ALSATray(object):
         aboutdlg.set_name(__appname__)
         aboutdlg.set_version(__version__)
         aboutdlg.set_copyright(__copyright__)
-        aboutdlg.set_comments(__doc__)
         aboutdlg.set_website(__website__)
         aboutdlg.set_logo_icon_name(VOL_ICON[0])
         aboutdlg.set_icon_name(VOL_ICON[0])
@@ -417,16 +483,140 @@ class ALSATray(object):
             self._toggle_mute(True)
 
 
+def notify(value, default=True):
+    if not NOTIFY and CLI_OPTS['notify'] != "no":
+        if DEBUG:
+            print("W: Notification not available:")
+            print("the 'pynotify' module is not available.")
+        else:
+            print("W: Notification not available...")
+        return
+    elif not NOTIFY:
+        return
+    if CLI_OPTS['notify'] == "no":
+        return
+    elif CLI_OPTS['notify'] == "none" and not default:
+        return
+    #Select icon
+    icon_index = int((100 - value) * (len(OSD_ICON) - 1) / 100)
+    #Notify
+    notification = pynotify.Notification(
+            "Volume",
+            "",
+            OSD_ICON[icon_index],
+            )
+    notification.set_hint_int32("value", value)
+    notification.set_hint_string("x-canonical-private-synchronous", "")
+    notification.show()
+
+
 if __name__ == "__main__":
-    #Show infos
-    print("%s - %s\n" % (__appname__, __doc__))
-    print("Version: %s" % __version__)
-    print(__copyright__)
-    #Run
-    alsa_volume = ALSATray()
-    try:
-        gtk.main()
-    except KeyboardInterrupt:
-        sys.exit(0)
+    if len(sys.argv) > 1:
+        for i in range(1, len(sys.argv)):
+            if sys.argv[i] == "+debug":
+                DEBUG = True
+            elif sys.argv[i] == "-debug":
+                DEBUG = False
+            elif sys.argv[i] == "+notify":
+                CLI_OPTS['notify'] = "yes"
+            elif sys.argv[i] == "-notify":
+                CLI_OPTS['notify'] = "no"
+            elif sys.argv[i] == "mute":
+                CLI_OPTS['mute'] = "toggle"
+                CLI = True
+            elif sys.argv[i] == "+mute":
+                CLI_OPTS['mute'] = "mute"
+                CLI = True
+            elif sys.argv[i] == "-mute":
+                CLI_OPTS['mute'] = "unmute"
+                CLI = True
+            elif len(sys.argv[i]) >= 1 and len(sys.argv[i]) <= 4 and \
+                 (sys.argv[i][0] == "+" or sys.argv[i][0] == "-") and \
+                 sys.argv[i][1:].isdigit() and int(sys.argv[i][1:]) >= 0 and \
+                 int(sys.argv[i][1:]) <= 100:
+                CLI_OPTS['volume'] = sys.argv[i]
+                CLI = True
+            elif sys.argv[i].isdigit() and int(sys.argv[i]) >= 0 and \
+                 int(sys.argv[i]) <= 100:
+                CLI_OPTS['volume'] = sys.argv[i]
+                CLI = True
+            elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
+                print("%s %s" % (__appname__, __version__))
+                print(__doc__)
+                print("COPYRIGHT:\n    %s" % __copyright__)
+                exit(0)
+            else:
+                print("E: Invalide option '%s'." % sys.argv[i])
+                print("Run 'alsa-tray --help' for help about CLI options.")
+                sys.exit(1)
+
+    if DEBUG:
+        print("%s %s\n" % (__appname__, __version__))
+        print("Python: version %s" % sys.version.replace("\n", ""))
+        if ALSAAUDIO:
+            print("pyAlsaAudio: available")
+        else:
+            print("DBus Python: unavailable")
+        if PYGTK:
+            print("pyGTK: available")
+        else:
+            print("pyGTK: unavailable")
+        if DBUS:
+            print("DBus Python: version %s" % dbus.__version__)
+        else:
+            print("DBus Python: unavailable")
+        if NOTIFY:
+            print("pyNotify: available")
+        else:
+            print("pyNotify: unavailable")
+        print("")
+
+    if not ALSAAUDIO:
+       print("E: pyAlsaAudio is not available")
+       sys.exit(2)
+
+    if CLI:
+        #Mixer
+        mixer = alsaaudio.Mixer(control=MIXER)
+        volume = mixer.getvolume()[0]
+        mute = bool(mixer.getmute()[0])
+        #Volume
+        if CLI_OPTS['volume'][0] == "+":
+            volume += int(CLI_OPTS['volume'][1:])
+        elif  CLI_OPTS['volume'][0] == "-":
+            volume -= int(CLI_OPTS['volume'][1:])
+        else:
+            volume = int(CLI_OPTS['volume'])
+        if volume > 100:
+            volume = 100
+        elif volume < 0:
+            volume = 0
+        #Mute
+        if CLI_OPTS['mute'] == "mute":
+            mute = True
+        elif CLI_OPTS['mute'] == "unmute":
+            mute = False
+        elif CLI_OPTS['mute'] == "toggle":
+            mute = not mute
+        #Set
+        mixer.setvolume(volume)
+        mixer.setmute(mute)
+        #Notify
+        if mute:
+            notify(0, default=False)
+        else:
+            notify(volume, default=False)
+        #Print infos
+        print("Volume: %i%%" % volume)
+        print("Muted:  %s" % mute)
+    else:
+        if not PYGTK:
+            print("E: Can't run in systray: pyGTK is not available.")
+            sys.exit(3)
+        alsa_volume = ALSATray()
+        try:
+            gtk.main()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
 
