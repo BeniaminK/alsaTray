@@ -52,10 +52,10 @@ USAGE:
         * Toggle mute/Unmute
             alsa-tray mute
 
-    * Liste of available mixers
+    * Liste of available mixers:
         alsa-tray --mixer-list
 
-    * Help (this what you are reading)
+    * Help (this what you are reading):
         alsa-tray --help, -h, -?
 
 OPTIONS:
@@ -65,13 +65,13 @@ OPTIONS:
         The default mixer is 'Master'. The list of available mixers can
         be obtained with 'alsa-tray --mixer-list'.
 
-    * Notifications (enable/disable notifications)
-        +notify 
+    * Notifications:
+        +notify, --notify
             Enable notifications
         -notify
              Disable notifications
 
-    * Debug mode (gives more information when an error occur)
+    * Debug mode:
         +debug, --debug
             Enable debug mode
         -debug
@@ -530,7 +530,7 @@ if __name__ == "__main__":
                 DEBUG = True
             elif sys.argv[i] == "-debug":
                 DEBUG = False
-            elif sys.argv[i] == "+notify":
+            elif sys.argv[i] in ("+notify", "--notify"):
                 CLI_OPTS['notify'] = "yes"
             elif sys.argv[i] == "-notify":
                 CLI_OPTS['notify'] = "no"

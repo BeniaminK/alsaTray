@@ -19,7 +19,7 @@
 
   Usage:
     run 'alsa-tray' for launching ALSA Tray in systray
-    run 'alsa-tray --help' for help with CLI otions
+    run 'alsa-tray --help' or 'man alsa-tray' for help with CLI otions
 
   Install:
     For install ALSA Tray, run './install.sh --install' as root.

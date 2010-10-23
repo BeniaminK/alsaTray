@@ -1,0 +1,100 @@
+.TH alsa-tray 1 "Sat, 23 Oct 2010" "version 0.2" "ALSA TRAY"
+ 
+.SH NAME
+alsa-tray \- provides a systray icon for setting ALSA mixers volume
+
+.SH SYNOPSIS
+.SS Run in systray:
+.RI alsa-tray " [options]
+
+.SS Change volume:
+.RI alsa-tray " [options] [+|-] "<Value>
+
+.SS Mute:
+.RI alsa-tray " [options] [+|-] "mute
+
+.SH DESCRIPTION
+Provides a systray icon and a command line interface for setting the
+volume of the ALSA Mixers.
+
+.SS Change the volume:
+.TP 4
+* Increase volume:
+.RI alsa-tray " +<value>
+.TP 4
+* Decrease volume:
+.RI alsa-tray " -<value>
+.TP 4
+* Set volume to a specific value:
+.RI alsa-tray " <value>
+.RS 4
+where <value> is a number between 0 and 100.
+
+.SS Mute/Unmute the volume:
+.TP 4
+* Mute:
+.RI alsa-tray " +mute
+.TP 4
+* Unmute:
+.RI alsa-tray " -mute
+.TP 4
+* Toggle mute/Unmute
+.RI alsa-tray " mute
+
+.SS Liste of available mixers:
+.RI alsa-tray " --mixer-list
+
+.SS Help:
+.RI alsa-tray " --help ", "-h ", "-?
+
+.SH OPTIONS
+.SS Select mixer:
+.IR --mixer= "<MixerName>
+.RS 0
+where <MixerName> is the name of the mixer.
+The default mixer is 'Master'. The list of available mixers can
+be obtained with 'alsa-tray --mixer-list'.
+
+.SS Notifications:
+.TP 4
+.IR +notify ", " --notify
+Enable notifications
+.TP 4
+.I -notify
+ Disable notifications
+
+.SS Debug mode:
+.TP 4
+.IR +debug ", " --debug
+Enable debug mode
+.TP 4
+.I -debug
+Disable debug mode
+
+.SH EXAMPLE
+.SS Increase the volume of 5%:
+alsa-tray +5
+.SS Set volume to 42% and show a notification:
+alsa-tray +notify 42
+.SS Mute the volume:
+alsa-tray +mute
+.SS Launch in systray with debugging infos and 'Master' mixer selected:
+alsa-tray --debug --mixer=Master
+
+
+.SH WEB SITE
+http://software.flogisoft.com/alsa-tray/
+
+.SH AUTHOR
+Fabien Loison <flo@flogisoft.com>
+
+.SH REPORTING BUGS
+Report bugs at <https://bugs.launchpad.net/alsa-tray>.
+
+.SH COPYRIGHT
+Copyright  ©  2010 Fabien Loison <flo@flogisoft.com>.
+.PP
+ALSA Tray is free software under GNU GPLv3+ licence <http://gnu.org/licenses/gpl.html>,
+you are free to modify and redistribute it under the terms of the license.
+
+

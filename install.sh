@@ -13,6 +13,10 @@ _install() {
 	mkdir -pv "$1"/usr/share/doc/alsa-tray/
 	cp -v README "$1"/usr/share/doc/alsa-tray/
 	cp -v AUTHORS "$1"/usr/share/doc/alsa-tray/
+	#man
+	mkdir -pv "$1"/usr/share/man/man1/
+	cp -v ./man.1 "$1"/usr/share/man/man1/alsa-tray.1
+	gzip --best -f "$1"/usr/share/man/man1/alsa-tray.1
 }
 
 
