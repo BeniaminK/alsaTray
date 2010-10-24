@@ -118,9 +118,9 @@ import os
 
 try:
     import alsaaudio
-    ALSAAUDIO = True
 except ImportError:
-    ALSAAUDIO = False
+    print("E: pyAlsaAudio is not available")
+    sys.exit(2)
 try:
     import gobject
     import gtk
@@ -143,23 +143,19 @@ except ImportError:
 
 
 MIXER = "Master"
-
 CARD = 0 #hw:0
-
 VOL_ICON = [
         "audio-volume-high-panel",   # > 66%
         "audio-volume-medium-panel", # > 33%
         "audio-volume-low-panel",    # > 0%
         "audio-volume-muted-panel",  # = 0%
         ]
-
 OSD_ICON = [
         "notification-audio-volume-high",   # > 66%
         "notification-audio-volume-medium", # > 33%
         "notification-audio-volume-low",    # > 0%
         "notification-audio-volume-muted",  # = 0%
         ]
-
 DEBUG = False
 CLI = False
 GUI = False
@@ -168,6 +164,8 @@ CLI_OPTS = {
         'mute': "none",
         'notify': "none"
         }
+CARD_LIST = []
+MIXER_LIST = {}
 
 class Timer(object):
 
@@ -522,7 +520,7 @@ def notify(value, default=True):
     if not NOTIFY and CLI_OPTS['notify'] != "no":
         if DEBUG:
             print("W: Notification not available:")
-            print("the 'pynotify' module is not available.")
+            print("the 'pyNotify' module is not available.")
         else:
             print("W: Notification not available...")
         return
@@ -545,7 +543,108 @@ def notify(value, default=True):
     notification.show()
 
 
+def ls_cards_mixers():
+    """ List the availaible cards and mixers.
+
+    List all the available cards and all the usable mixers of each cards.
+    """
+    global CARD_LIST
+    global MIXER_LIST
+    CARD_LIST = alsaaudio.cards()
+    for card_name in CARD_LIST:
+        MIXER_LIST[card_name] = {
+                'pretty_name': "%s (hw:%i)" % (card_name, CARD_LIST.index(card_name)),
+                'mixers': [],
+                }
+        for mixer_name in alsaaudio.mixers(CARD_LIST.index(card_name)):
+            mixer = alsaaudio.Mixer(control=mixer_name, cardindex=CARD_LIST.index(card_name))
+            if len(mixer.switchcap()) == 1 and mixer.switchcap()[0] in \
+               ("Playback Mute", "Joined Playback Mute"):
+                try:
+                    mixer.getmute()
+                    mixer.getvolume()
+                except alsaaudio.ALSAAudioError:
+                    pass
+                else:
+                    MIXER_LIST[card_name]['mixers'].append(mixer_name)
+
+
+def select_default_card():
+    """Select the default card.
+    
+    Select the first card that haves an usable mixer.
+    """
+    if len(CARD_LIST) > 0:
+        global CARD
+        for card_name in CARD_LIST:
+            if len(MIXER_LIST[card_name]['mixers']) > 0:
+                CARD = CARD_LIST.index(card_name)
+                return
+    else:
+        print("E: No sound card found.")
+        sys.exit(7)
+
+
+def select_default_mixer(card):
+    """Select the default mixer of the given card.
+
+    If 'Master' available, select it, else select PCM if available, else
+    select the first usable mixer.
+    
+    Argument:
+        * card -- the card index
+    """
+    if check_card(card):
+        global MIXER
+        if len(MIXER_LIST[CARD_LIST[card]]['mixers']) == 0:
+            print("E: No usable mixer for card 'hw:%i'." % card)
+            sys.exit(6)
+        if check_mixer("Master", card):
+            MIXER = "Master"
+        elif check_mixer("PCM", card):
+            MIXER = "PCM"
+        else:
+            MIXER = MIXER_LIST[CARD_LIST[card]]['mixers'][0]
+
+
+def check_card(card):
+    """Check if the given card is available
+    
+    Argument:
+        * card -- the card index
+
+    Returns:
+        True if the card is available, False else.
+    """
+    if card <= len(CARD_LIST)-1 and card >= 0:
+        return True
+    else:
+        return False
+
+
+def check_mixer(mixer_name, card):
+    """Check if the given mixer of the given card is available
+    
+    Argument:
+        * mixer_name -- the mixer name
+        * card -- the card index
+
+    Returns:
+        True if the mixer is available, False else.
+    """
+    if mixer_name in MIXER_LIST[CARD_LIST[card]]['mixers']:
+        return True
+    else:
+        return False
+
+
 if __name__ == "__main__":
+    #List available cards and mixers
+    ls_cards_mixers()
+    #Select default card and mixer
+    select_default_card()
+    select_default_mixer(CARD)
+    #Parse args
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv)):
             if sys.argv[i] in ("+tray", "--tray"):
@@ -583,20 +682,15 @@ if __name__ == "__main__":
                 MIXER = sys.argv[i][8:]
             elif sys.argv[i] in ("--mixer-list", "--mixers-list",
                  "--list-mixer", "--list-mixers"):
-                if ALSAAUDIO:
-                    if CARD <= len(alsaaudio.cards())-1 and CARD > 0:
-                        print("Available mixers:")
-                        for mixer_name in alsaaudio.mixers(CARD):
-                            if mixer_name.find(" ") == -1:
-                                print("  * %s" % mixer_name)
-                        sys.exit(0)
-                    else:
-                        print("E: Unknown card 'hw:%i'." % CARD)
-                        print("Run asla-tray --card-list for seeing the available cards.")
-                        sys.exit(4)
+                if check_card(CARD):
+                    print("Available mixers:")
+                    for mixer_name in MIXER_LIST[CARD_LIST[CARD]]['mixers']:
+                            print("  * %s" % mixer_name)
+                    sys.exit(0)
                 else:
-                    print("E: pyAlsaAudio is not available")
-                    sys.exit(2)
+                    print("E: Unknown card 'hw:%i'." % CARD)
+                    print("Run asla-tray --card-list for seeing the available cards.")
+                    sys.exit(4)
             elif sys.argv[i][:7] == "--card=" and sys.argv[i][7:].isdigit():
                 CARD = int(sys.argv[i][7:])
             elif sys.argv[i][:9] in ("--card=hw", "--card=HW") and \
@@ -606,28 +700,18 @@ if __name__ == "__main__":
                  sys.argv[i][10:].isdigit():
                 CARD = int(sys.argv[i][10:])
             elif sys.argv[i][:7] == "--card=" and sys.argv[i][7:].isalnum():
-                if ALSAAUDIO:
-                    if sys.argv[i][7:] in alsaaudio.cards():
-                        CARD = alsaaudio.cards().index(sys.argv[i][7:])
-                    else:
-                        print("E: Unknown card '%s'." % sys.argv[i][7:])
-                        print("Run asla-tray --card-list for seeing the available cards.")
-                        sys.exit(4)
+                if sys.argv[i][7:] in CARD_LIST:
+                    CARD = CARD_LIST.index(sys.argv[i][7:])
                 else:
-                    print("E: pyAlsaAudio is not available")
-                    sys.exit(2)
+                    print("E: Unknown card '%s'." % sys.argv[i][7:])
+                    print("Run asla-tray --card-list for seeing the available cards.")
+                    sys.exit(4)
             elif sys.argv[i] in ("--card-list", "--cards-list",
                  "--list-card", "--list-cards"):
-                if ALSAAUDIO:
-                    print("Available cards:")
-                    card_index = 0
-                    for card_name in alsaaudio.cards():
-                        print("  * hw:%i - %s" % (card_index, card_name))
-                        card_index += 1
-                    sys.exit(0)
-                else:
-                    print("E: pyAlsaAudio is not available")
-                    sys.exit(2)
+                print("Available cards:")
+                for card_name in CARD_LIST:
+                    print("    * %s" % MIXER_LIST[card_name]['pretty_name'])
+                sys.exit(0)
             elif sys.argv[i] in ("-h", "--help", "-?"):
                 print("%s %s" % (__appname__, __version__))
                 print(__doc__)
@@ -642,10 +726,7 @@ if __name__ == "__main__":
     if DEBUG:
         print("%s %s\n" % (__appname__, __version__))
         print("Python: version %s" % sys.version.replace("\n", ""))
-        if ALSAAUDIO:
-            print("pyAlsaAudio: available")
-        else:
-            print("DBus Python: unavailable")
+        print("pyAlsaAudio: available")
         if PYGTK:
             print("pyGTK: available")
         else:
@@ -660,19 +741,22 @@ if __name__ == "__main__":
             print("pyNotify: unavailable")
         print("")
 
-    if not ALSAAUDIO:
-        print("E: pyAlsaAudio is not available")
-        sys.exit(2)
-
-    if CARD > len(alsaaudio.cards())-1 or CARD < 0:
+    if not check_card(CARD):
         print("E: Unknown card 'hw:%i'." % CARD)
         print("Run asla-tray --card-list for seeing the available cards.")
-        sys.exit(4)
+        print("Search for the default card instead...")
+        select_default_card()
+        #Found...
+        print("Card 'hw:%i' selected." % CARD)
 
-    if not MIXER in alsaaudio.mixers(CARD):
-        print("E: Unknown mixer '%s' for card 'hw%i'." % (MIXER, CARD))
+    if not check_mixer(MIXER, CARD):
+        print("E: Unknown or unusable mixer '%s' for card 'hw%i'." % (MIXER, CARD))
         print("Run asla-tray --mixer-list for seeing the available mixers.")
-        sys.exit(3)
+        print("Search for the default mixer instead...")
+        select_default_mixer(CARD)
+        #Found...
+        print("'%s' mixer of 'hw:%i' selected."  % (MIXER, CARD))
+
 
     if CLI:
         #Mixer
