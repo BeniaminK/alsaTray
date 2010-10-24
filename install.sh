@@ -7,8 +7,11 @@ _install() {
 	#$1 : the output path, if different of /
 	#Code
 	mkdir -pv "$1"/usr/bin
-	cp -v ./alsa_tray.py "$1"/usr/bin/alsa-tray
+	cp -v ./code/alsa_tray.py "$1"/usr/bin/alsa-tray
 	chmod -v 755 "$1"/usr/bin/alsa-tray
+	#Share
+	mkdir -pv "$1"/usr/share/alsa-tray/
+	cp -v ./pixmaps/* "$1"/usr/share/alsa-tray/
 	#doc
 	mkdir -pv "$1"/usr/share/doc/alsa-tray/
 	cp -v README "$1"/usr/share/doc/alsa-tray/
@@ -21,9 +24,11 @@ _install() {
 
 
 _remove() {
-	#Remove MPD GNOME
+	#Remove ALSA Tray
+	rm -rv /usr/share/alsa-tray
 	rm -rv /usr/share/doc/alsa-tray
 	rm -v /usr/bin/alsa-tray
+	rm -v /usr/share/man/man1/alsa-tray.1.gz
 }
 
 

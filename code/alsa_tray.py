@@ -167,6 +167,15 @@ CLI_OPTS = {
 CARD_LIST = []
 MIXER_LIST = {}
 
+if "DEVEL" in os.environ:
+    CONFIG_GUI_PATH = "./alsa_tray_config.glade"
+    MIXER_ICON_PATH = "../pixmaps/mixer_icon.png"
+    AT_ICON_PATH = "../pixmaps/alsa-tray_icon.png"
+else:
+    CONFIG_GUI_PATH = "/usr/share/alsa-tray/alsa_tray_config.glade"
+    MIXER_ICON_PATH = "/usr/share/alsa-tray/mixer_icon.png"
+    AT_ICON_PATH = "/usr/share/alsa-tray/alsa-tray_icon.png"
+
 class Timer(object):
 
     """A basic timer.
@@ -283,27 +292,28 @@ class ALSATray(object):
         #
         menu_mixer0 = gtk.ImageMenuItem("GNOME ALSA Mixer")
         menu_mixer0_img = gtk.Image()
-        menu_mixer0_img.set_from_icon_name(
-                "gtk-preferences",
-                gtk.ICON_SIZE_MENU,
-                )
+        menu_mixer0_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer0.set_image(menu_mixer0_img)
         #
         menu_mixer1 = gtk.ImageMenuItem("ALSA Mixer")
         menu_mixer1_img = gtk.Image()
-        menu_mixer1_img.set_from_icon_name(
-                "gtk-preferences",
-                gtk.ICON_SIZE_MENU,
-                )
+        menu_mixer1_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer1.set_image(menu_mixer1_img)
         #
         menu_mixer2 = gtk.ImageMenuItem("XFCE4 Mixer")
         menu_mixer2_img = gtk.Image()
-        menu_mixer2_img.set_from_icon_name(
-                "gtk-preferences",
-                gtk.ICON_SIZE_MENU,
-                )
+        menu_mixer2_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer2.set_image(menu_mixer2_img)
+        #
+        menu_mixer3 = gtk.ImageMenuItem("Gamix")
+        menu_mixer3_img = gtk.Image()
+        menu_mixer3_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer3.set_image(menu_mixer3_img)
+        #
+        menu_mixer4 = gtk.ImageMenuItem("ALSA Mixer GUI")
+        menu_mixer4_img = gtk.Image()
+        menu_mixer4_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer4.set_image(menu_mixer4_img)
         #
         menu_separator1 = gtk.MenuItem()
         #
@@ -318,12 +328,18 @@ class ALSATray(object):
         if os.path.isfile("/usr/bin/gnome-alsamixer"):
             self.menu.append(menu_mixer0)
             show_separator1 = True
-        if os.path.isfile("/usr/bin/alsamixer") and \
-           os.path.isfile("/usr/bin/gnome-terminal"):
-            self.menu.append(menu_mixer1)
+        if os.path.isfile("/usr/bin/gamix"):
+            self.menu.append(menu_mixer3)
+            show_separator1 = True
+        if os.path.isfile("/usr/bin/alsamixergui"):
+            self.menu.append(menu_mixer4)
             show_separator1 = True
         if os.path.isfile("/usr/bin/xfce4-mixer"):
             self.menu.append(menu_mixer2)
+            show_separator1 = True
+        if os.path.isfile("/usr/bin/alsamixer") and \
+           os.path.isfile("/usr/bin/gnome-terminal"):
+            self.menu.append(menu_mixer1)
             show_separator1 = True
         if show_separator1:
             self.menu.append(menu_separator1)
@@ -367,6 +383,16 @@ class ALSATray(object):
                 "activate",
                 self.on_menu_mixer_activate,
                 "xfce4-mixer &",
+                )
+        menu_mixer3.connect(
+                "activate",
+                self.on_menu_mixer_activate,
+                "gamix &",
+                )
+        menu_mixer4.connect(
+                "activate",
+                self.on_menu_mixer_activate,
+                "alsamixergui &",
                 )
         menu_about.connect("activate", self.on_menu_about_activate)
         menu_quit.connect("activate", self.on_menu_quit_activate)
@@ -498,8 +524,10 @@ class ALSATray(object):
         aboutdlg.set_version(__version__)
         aboutdlg.set_copyright(__copyright__)
         aboutdlg.set_website(__website__)
-        aboutdlg.set_logo_icon_name(VOL_ICON[0])
-        aboutdlg.set_icon_name(VOL_ICON[0])
+        img_logo = gtk.Image()
+        img_logo.set_from_file(AT_ICON_PATH)
+        aboutdlg.set_logo(img_logo.get_pixbuf())
+        aboutdlg.set_icon_from_file(AT_ICON_PATH)
         aboutdlg.connect("response", self.on_aboutdlg_response)
         aboutdlg.show()
 
