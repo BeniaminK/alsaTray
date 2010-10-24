@@ -50,6 +50,9 @@ where <value> is a number between 0 and 100.
 .SS Liste of available mixers:
 .RI alsa\-tray " \-\-mixer\-list
 
+.SS Liste of available cards:
+.RI alsa\-tray " \-\-card\-list
+
 .SS Help:
 .RI alsa\-tray " \-\-help ", "\-h ", "\-?
 
@@ -60,6 +63,13 @@ where <value> is a number between 0 and 100.
 where <MixerName> is the name of the mixer.
 The default mixer is 'Master'. The list of available mixers can
 be obtained with 'alsa\-tray \-\-mixer\-list'.
+
+.SS Select card:
+.IR \-\-card= "<Card>
+.RS 0
+where <Card> is the number of the card.
+The default card is 'hw:0'. The list of available cards can
+be obtained with 'alsa-tray \-\-card\-list'.
 
 .SS Notifications:
 .TP 4
@@ -77,7 +87,7 @@ Enable debug mode
 .I \-debug
 Disable debug mode
 
-.SH EXAMPLE
+.SH EXAMPLES
 .SS Increase the volume of 5%:
 alsa\-tray +5
 .SS Set volume to 42% and show a notification:
@@ -86,6 +96,8 @@ alsa\-tray +notify 42
 alsa\-tray +mute
 .SS Launch in systray with debugging infos and 'Master' mixer selected:
 alsa\-tray \-\-debug \-\-mixer=Master
+.SS Set the volume of the second sound card to 100%:
+alsa\-tray \-\-card=hw:1 100
 .SS Launch in systray and set the volume to 80% and muted:
 alsa-tray +tray +mute 80
 

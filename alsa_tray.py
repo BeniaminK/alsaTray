@@ -55,6 +55,9 @@ USAGE:
     * Liste of available mixers:
         alsa-tray --mixer-list
 
+    * Liste of available cards:
+        alsa-tray --card-list
+
     * Help (this what you are reading):
         alsa-tray --help, -h, -?
 
@@ -64,6 +67,12 @@ OPTIONS:
         where <MixerName> is the name of the mixer.
         The default mixer is 'Master'. The list of available mixers can
         be obtained with 'alsa-tray --mixer-list'.
+
+    * Select card:
+        --card=<Card>
+        where <Card> is the number of the card.
+        The default card is 'hw:0'. The list of available cards can
+        be obtained with 'alsa-tray --card-list'.
 
     * Notifications:
         +notify, --notify
@@ -77,15 +86,22 @@ OPTIONS:
         -debug
             Disable debug mode
 
-EXAMPLE:
+EXAMPLES:
     * Increase the volume of 5%:
         alsa-tray +5
+
     * Set volume to 42% and show a notification:
         alsa-tray +notify 42
+
     * Mute the volume:
         alsa-tray +mute
+
     * Launch in systray with debugging infos and "Master" mixer selected:
         alsa-tray --debug --mixer=Master
+
+    * Set the volume of the second sound card to 100%:
+        alsa-tray --card=hw:1 100
+
     * Launch in systray and set the volume to 80% and muted:
         alsa-tray +tray +mute 80
 """
@@ -127,6 +143,8 @@ except ImportError:
 
 
 MIXER = "Master"
+
+CARD = 0 #hw:0
 
 VOL_ICON = [
         "audio-volume-high-panel",   # > 66%
@@ -360,7 +378,7 @@ class ALSATray(object):
 
     def _update_infos(self):
         #Mixer
-        mixer = alsaaudio.Mixer(control=MIXER)
+        mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         volume = mixer.getvolume()[0]
         mute = mixer.getmute()[0]
         #Tray icon
@@ -402,7 +420,7 @@ class ALSATray(object):
 
     def _set_volume(self, value, notify=False):
         #Mixer
-        mixer = alsaaudio.Mixer(control=MIXER)
+        mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         volume = mixer.getvolume()[0]
         #Calculate the new volume
         volume = volume + value
@@ -420,7 +438,7 @@ class ALSATray(object):
 
     def _toggle_mute(self, notify=False):
         #Mixer
-        mixer = alsaaudio.Mixer(control=MIXER)
+        mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         #Mute/Unmute
         if mixer.getmute()[0]:
             mixer.setmute(False)
@@ -458,7 +476,7 @@ class ALSATray(object):
 
     def on_slider_value_changed(self, widget):
         if self.window.get_visible():
-            mixer = alsaaudio.Mixer(control=MIXER)
+            mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
             mixer.setmute(False)
             mixer.setvolume(int(self.slider.get_value()))
             self._update_infos()
@@ -566,10 +584,46 @@ if __name__ == "__main__":
             elif sys.argv[i] in ("--mixer-list", "--mixers-list",
                  "--list-mixer", "--list-mixers"):
                 if ALSAAUDIO:
-                    print("Available mixers:")
-                    for mixer_name in alsaaudio.mixers():
-                        if mixer_name.find(" ") == -1:
-                            print("  * %s" % mixer_name)
+                    if CARD <= len(alsaaudio.cards())-1 and CARD > 0:
+                        print("Available mixers:")
+                        for mixer_name in alsaaudio.mixers(CARD):
+                            if mixer_name.find(" ") == -1:
+                                print("  * %s" % mixer_name)
+                        sys.exit(0)
+                    else:
+                        print("E: Unknown card 'hw:%i'." % CARD)
+                        print("Run asla-tray --card-list for seeing the available cards.")
+                        sys.exit(4)
+                else:
+                    print("E: pyAlsaAudio is not available")
+                    sys.exit(2)
+            elif sys.argv[i][:7] == "--card=" and sys.argv[i][7:].isdigit():
+                CARD = int(sys.argv[i][7:])
+            elif sys.argv[i][:9] in ("--card=hw", "--card=HW") and \
+                 sys.argv[i][9:].isdigit():
+                CARD = int(sys.argv[i][9:])
+            elif sys.argv[i][:10] in ("--card=hw:", "--card=HW:") and \
+                 sys.argv[i][10:].isdigit():
+                CARD = int(sys.argv[i][10:])
+            elif sys.argv[i][:7] == "--card=" and sys.argv[i][7:].isalnum():
+                if ALSAAUDIO:
+                    if sys.argv[i][7:] in alsaaudio.cards():
+                        CARD = alsaaudio.cards().index(sys.argv[i][7:])
+                    else:
+                        print("E: Unknown card '%s'." % sys.argv[i][7:])
+                        print("Run asla-tray --card-list for seeing the available cards.")
+                        sys.exit(4)
+                else:
+                    print("E: pyAlsaAudio is not available")
+                    sys.exit(2)
+            elif sys.argv[i] in ("--card-list", "--cards-list",
+                 "--list-card", "--list-cards"):
+                if ALSAAUDIO:
+                    print("Available cards:")
+                    card_index = 0
+                    for card_name in alsaaudio.cards():
+                        print("  * hw:%i - %s" % (card_index, card_name))
+                        card_index += 1
                     sys.exit(0)
                 else:
                     print("E: pyAlsaAudio is not available")
@@ -607,17 +661,22 @@ if __name__ == "__main__":
         print("")
 
     if not ALSAAUDIO:
-       print("E: pyAlsaAudio is not available")
-       sys.exit(2)
+        print("E: pyAlsaAudio is not available")
+        sys.exit(2)
 
-    if not MIXER in alsaaudio.mixers():
-       print("E: Unknown mixer '%s'." % MIXER)
-       print("Run asla-tray --mixer-list for seeing the available mixers.")
-       sys.exit(3)
+    if CARD > len(alsaaudio.cards())-1 or CARD < 0:
+        print("E: Unknown card 'hw:%i'." % CARD)
+        print("Run asla-tray --card-list for seeing the available cards.")
+        sys.exit(4)
+
+    if not MIXER in alsaaudio.mixers(CARD):
+        print("E: Unknown mixer '%s' for card 'hw%i'." % (MIXER, CARD))
+        print("Run asla-tray --mixer-list for seeing the available mixers.")
+        sys.exit(3)
 
     if CLI:
         #Mixer
-        mixer = alsaaudio.Mixer(control=MIXER)
+        mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         volume = mixer.getvolume()[0]
         mute = bool(mixer.getmute()[0])
         #Volume
@@ -654,7 +713,7 @@ if __name__ == "__main__":
     if GUI or not CLI:
         if not PYGTK:
             print("E: Can't run in systray: pyGTK is not available.")
-            sys.exit(4)
+            sys.exit(5)
         alsa_volume = ALSATray()
         try:
             gtk.main()
