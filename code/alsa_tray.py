@@ -261,6 +261,70 @@ class MMKeys(object):
             self.main.on_mmkey_pressed(destination)
 
 
+class ALSATrayConfig(object):
+
+    """The ALSA Tray preferences dialog"""
+
+    def __init__(self):
+        """The constructor"""
+        self.gui = gtk.Builder()
+#        self.gui.set_translation_domain(__appname__)
+        self.gui.add_from_file(CONFIG_GUI_PATH)
+        self.gui.connect_signals(self)
+        self.gui.get_object("win_config").set_icon_from_file(AT_ICON_PATH)
+        self.enabled = False #prevent error when setting the comboboxes
+        #Cards
+        cbox_card = self.gui.get_object("cbox_card")
+        lsst_card = gtk.ListStore(str)
+        cbox_card.set_model(lsst_card)
+        cell_card = gtk.CellRendererText()
+        cbox_card.pack_start(cell_card, True)
+        cbox_card.add_attribute(cell_card, "text", 0)
+        for card_name in CARD_LIST:
+            lsst_card.append( [MIXER_LIST[card_name]['pretty_name']] )
+        cbox_card.set_active(CARD)
+        #Mixer
+        self.cbox_mixer = self.gui.get_object("cbox_mixer")
+        self.lsst_mixer = gtk.ListStore(str)
+        self.cbox_mixer.set_model(self.lsst_mixer)
+        cell_mixer = gtk.CellRendererText()
+        self.cbox_mixer.pack_start(cell_mixer, True)
+        self.cbox_mixer.add_attribute(cell_mixer, "text", 0)
+        self._set_mixer_list()
+        self.enabled = True
+        
+    def _set_mixer_list(self):
+        self.lsst_mixer.clear()
+        for mixer_name in MIXER_LIST[CARD_LIST[CARD]]['mixers']:
+            self.lsst_mixer.append( [mixer_name] )
+        self.cbox_mixer.set_active(MIXER_LIST[CARD_LIST[CARD]]['mixers'].index(MIXER))
+
+    def on_cbox_card_changed(self, widget):
+        if not self.enabled:
+            return #prevent error when setting the comboboxes
+        if len(MIXER_LIST[CARD_LIST[widget.get_active()]]['mixers']) > 0:
+            global CARD
+            CARD = widget.get_active()
+            select_default_mixer(CARD)
+            self._set_mixer_list()
+            #TODO: write file
+            self.cbox_mixer.set_sensitive(True)
+        else:
+            self.cbox_mixer.set_sensitive(False)
+            self.lsst_mixer.clear()
+
+    def on_cbox_mixer_changed(self, widget):
+        if not self.enabled or not self.cbox_mixer.get_sensitive():
+            return #prevent error when setting the comboboxes
+        global MIXER
+        MIXER = MIXER_LIST[CARD_LIST[CARD]]['mixers'][widget.get_active()]
+        #TODO: write file
+
+    def on_btn_close_clicked(self, widget):
+        self.gui.get_object("win_config").destroy()
+
+
+
 class ALSATray(object):
 
     """The Alsa Volume tray icon"""
@@ -288,7 +352,7 @@ class ALSATray(object):
         #Menu
         self.menu_mute = gtk.CheckMenuItem("Mute")
         #
-        separator0 = gtk.MenuItem()
+        menu_separator0 = gtk.MenuItem()
         #
         menu_mixer0 = gtk.ImageMenuItem("GNOME ALSA Mixer")
         menu_mixer0_img = gtk.Image()
@@ -317,13 +381,17 @@ class ALSATray(object):
         #
         menu_separator1 = gtk.MenuItem()
         #
+        menu_preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        #
+        menu_separator2 = gtk.MenuItem()
+        #
         menu_about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
         #
         menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         #
         self.menu = gtk.Menu()
         self.menu.append(self.menu_mute)
-        self.menu.append(separator0)
+        self.menu.append(menu_separator0)
         show_separator1 = False
         if os.path.isfile("/usr/bin/gnome-alsamixer"):
             self.menu.append(menu_mixer0)
@@ -343,6 +411,8 @@ class ALSATray(object):
             show_separator1 = True
         if show_separator1:
             self.menu.append(menu_separator1)
+        self.menu.append(menu_preferences)
+        self.menu.append(menu_separator2)
         self.menu.append(menu_about)
         self.menu.append(menu_quit)
         #### Signals ####
@@ -394,6 +464,7 @@ class ALSATray(object):
                 self.on_menu_mixer_activate,
                 "alsamixergui &",
                 )
+        menu_preferences.connect("activate", self.on_menu_preferences_avtivate)
         menu_about.connect("activate", self.on_menu_about_activate)
         menu_quit.connect("activate", self.on_menu_quit_activate)
         #### Timer ####
@@ -442,7 +513,7 @@ class ALSATray(object):
         #Move window
         self.window.move(win_x, win_y)
 
-    def _set_volume(self, value, notify=False):
+    def _set_volume(self, value, do_notify=False):
         #Mixer
         mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         volume = mixer.getvolume()[0]
@@ -453,14 +524,14 @@ class ALSATray(object):
         elif volume < 0:
             volume = 0
         #Show notification
-        if notify:
+        if do_notify:
             notify(volume)
         #Set the volume
         mixer.setvolume(volume)
         #Update information
         self._update_infos()
 
-    def _toggle_mute(self, notify=False):
+    def _toggle_mute(self, do_notify=False):
         #Mixer
         mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         #Mute/Unmute
@@ -469,7 +540,7 @@ class ALSATray(object):
         else:
             mixer.setmute(True)
         #Show notification
-        if notify:
+        if do_notify:
             if mixer.getmute()[0]:
                 notify(0)
             else:
@@ -515,8 +586,8 @@ class ALSATray(object):
     def on_menu_mixer_activate(self, widget, command):
         os.popen(command)
 
-    def on_menu_quit_activate(self, widget):
-        gtk.main_quit()
+    def on_menu_preferences_avtivate(self, widget):
+        ALSATrayConfig()
 
     def on_menu_about_activate(self, widget):
         aboutdlg = gtk.AboutDialog()
@@ -530,6 +601,9 @@ class ALSATray(object):
         aboutdlg.set_icon_from_file(AT_ICON_PATH)
         aboutdlg.connect("response", self.on_aboutdlg_response)
         aboutdlg.show()
+
+    def on_menu_quit_activate(self, widget):
+        gtk.main_quit()
 
     def on_aboutdlg_response(self, widget, response):
         if response < 0:

@@ -11,6 +11,7 @@ _install() {
 	chmod -v 755 "$1"/usr/bin/alsa-tray
 	#Share
 	mkdir -pv "$1"/usr/share/alsa-tray/
+	cp -v ./code/alsa_tray_config.glade "$1"/usr/share/alsa-tray/
 	cp -v ./pixmaps/* "$1"/usr/share/alsa-tray/
 	#doc
 	mkdir -pv "$1"/usr/share/doc/alsa-tray/
