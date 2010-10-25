@@ -5,7 +5,7 @@
   <object class="GtkWindow" id="win_config">
     <property name="visible">True</property>
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Preferencies - ALSA Tray</property>
+    <property name="title" translatable="yes">Preferences - ALSA Tray</property>
     <property name="window_position">center-always</property>
     <property name="default_width">300</property>
     <child>

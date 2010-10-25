@@ -109,7 +109,8 @@ EXAMPLES:
 __version__ = "0.3"
 __author__ = "Fabien Loison <flo@flogisoft.com>"
 __copyright__ = "Copyright © 2010 Fabien LOISON"
-__appname__ = "ALSA Tray"
+__appdispname__ = "ALSA Tray"
+__appname__ = "alsa-tray"
 __website__ = "http://software.flogisoft.com/alsa-tray/"
 
 
@@ -121,6 +122,11 @@ try:
 except ImportError:
     print("E: pyAlsaAudio is not available")
     sys.exit(2)
+try:
+    from xdg import BaseDirectory
+    XDG = True
+except ImportError:
+    XDG = False
 try:
     import gobject
     import gtk
@@ -166,6 +172,17 @@ CLI_OPTS = {
         }
 CARD_LIST = []
 MIXER_LIST = {}
+if XDG:
+    CONFIG_FILE_PATH = os.path.join(
+            BaseDirectory.save_config_path(__appname__),
+            "%s.rc" % __appname__,
+            )
+else:
+    CONFIG_FILE_PATH = os.path.join(
+            os.environ["HOME"],
+            ".%s.rc" % __appname__,
+            )
+
 
 if "DEVEL" in os.environ:
     CONFIG_GUI_PATH = "./alsa_tray_config.glade"
@@ -307,7 +324,7 @@ class ALSATrayConfig(object):
             CARD = widget.get_active()
             select_default_mixer(CARD)
             self._set_mixer_list()
-            #TODO: write file
+            write_config()
             self.cbox_mixer.set_sensitive(True)
         else:
             self.cbox_mixer.set_sensitive(False)
@@ -318,7 +335,7 @@ class ALSATrayConfig(object):
             return #prevent error when setting the comboboxes
         global MIXER
         MIXER = MIXER_LIST[CARD_LIST[CARD]]['mixers'][widget.get_active()]
-        #TODO: write file
+        write_config()
 
     def on_btn_close_clicked(self, widget):
         self.gui.get_object("win_config").destroy()
@@ -591,7 +608,7 @@ class ALSATray(object):
 
     def on_menu_about_activate(self, widget):
         aboutdlg = gtk.AboutDialog()
-        aboutdlg.set_name(__appname__)
+        aboutdlg.set_name(__appdispname__)
         aboutdlg.set_version(__version__)
         aboutdlg.set_copyright(__copyright__)
         aboutdlg.set_website(__website__)
@@ -740,12 +757,65 @@ def check_mixer(mixer_name, card):
         return False
 
 
+def chack_all():
+    """Check card and mixer and try do fix misconfiguration"""
+    #Check card
+    if not check_card(CARD):
+        print("E: Unknown card 'hw:%i'." % CARD)
+        print("Run asla-tray --card-list for seeing the available cards.")
+        print("Search for the default card instead...")
+        select_default_card()
+        #Found...
+        print("Card 'hw:%i' selected." % CARD)
+    #Check if the card have at least one mixer
+    if len(MIXER_LIST[CARD_LIST[CARD]]['mixers']) == 0:
+        print("E: No usable mixer for card 'hw:%i'." % CARD)
+        print("Search for the default card instead...")
+        select_default_card()
+        #Found...
+        print("Card 'hw:%i' selected." % CARD)
+    #Check mixer
+    if not check_mixer(MIXER, CARD):
+        print("E: Unknown or unusable mixer '%s' for card 'hw%i'." % (MIXER, CARD))
+        print("Run asla-tray --mixer-list for seeing the available mixers.")
+        print("Search for the default mixer instead...")
+        select_default_mixer(CARD)
+        #Found...
+        print("'%s' mixer of 'hw:%i' selected."  % (MIXER, CARD))
+
+
+def read_config():
+    if not os.path.isfile(CONFIG_FILE_PATH):
+        return
+    global CARD
+    global MIXER
+    conf_file = open(CONFIG_FILE_PATH, "r")
+    for line in conf_file:
+        if line[:8] == "card=hw:" and line[8:].replace("\n", "").isdigit():
+            CARD = int(line[8:].replace("\n", ""))
+        elif line[:6] == "mixer=" and line[6:].replace("\n", "").isalnum():
+            MIXER = line[6:].replace("\n", "")
+    conf_file.close()
+
+
+def write_config():
+    try:
+        conf_file = open(CONFIG_FILE_PATH, "w")
+        conf_file.write("card=hw:%i\n" % CARD)
+        conf_file.write("mixer=%s\n" % MIXER)
+    except:
+        pass
+    else:
+        conf_file.close()
+
+
 if __name__ == "__main__":
     #List available cards and mixers
     ls_cards_mixers()
-    #Select default card and mixer
-    select_default_card()
-    select_default_mixer(CARD)
+    #Read configuration file
+    read_config()
+    #Check configuration
+    chack_all()
     #Parse args
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv)):
@@ -815,7 +885,7 @@ if __name__ == "__main__":
                     print("    * %s" % MIXER_LIST[card_name]['pretty_name'])
                 sys.exit(0)
             elif sys.argv[i] in ("-h", "--help", "-?"):
-                print("%s %s" % (__appname__, __version__))
+                print("%s %s" % (__appdispname__, __version__))
                 print(__doc__)
                 print("COPYRIGHT:\n    %s\n" % __copyright__)
                 print("WEB SITE:\n    %s" % __website__)
@@ -826,9 +896,13 @@ if __name__ == "__main__":
                 sys.exit(1)
 
     if DEBUG:
-        print("%s %s\n" % (__appname__, __version__))
+        print("%s %s\n" % (__appdispname__, __version__))
         print("Python: version %s" % sys.version.replace("\n", ""))
         print("pyAlsaAudio: available")
+        if XDG:
+            print("Python XDG: available")
+        else:
+            print("Python XDG: unavailable")
         if PYGTK:
             print("pyGTK: available")
         else:
@@ -843,22 +917,8 @@ if __name__ == "__main__":
             print("pyNotify: unavailable")
         print("")
 
-    if not check_card(CARD):
-        print("E: Unknown card 'hw:%i'." % CARD)
-        print("Run asla-tray --card-list for seeing the available cards.")
-        print("Search for the default card instead...")
-        select_default_card()
-        #Found...
-        print("Card 'hw:%i' selected." % CARD)
-
-    if not check_mixer(MIXER, CARD):
-        print("E: Unknown or unusable mixer '%s' for card 'hw%i'." % (MIXER, CARD))
-        print("Run asla-tray --mixer-list for seeing the available mixers.")
-        print("Search for the default mixer instead...")
-        select_default_mixer(CARD)
-        #Found...
-        print("'%s' mixer of 'hw:%i' selected."  % (MIXER, CARD))
-
+    #Check CLI options (card and mixer)
+    chack_all()
 
     if CLI:
         #Mixer
