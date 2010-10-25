@@ -12,6 +12,10 @@
   Dependencies:
     * [Needed  ] pyAlsaAudio <http://pyalsaaudio.sourceforge.net/>
 
+	* [Optional] Python XDG <http://freedesktop.org/wiki/Software/pyxdg>
+	             NOTE: Used for finding the best place for the
+				 config file
+
     * [Optional] PyGTK 2.x <http://pygtk.org/>
                  NOTE: PyGTK is optional for using ALSA Tray with CLI, but
                  it is needed for having a systray icon.

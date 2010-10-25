@@ -791,10 +791,11 @@ def read_config():
     global MIXER
     conf_file = open(CONFIG_FILE_PATH, "r")
     for line in conf_file:
-        if line[:8] == "card=hw:" and line[8:].replace("\n", "").isdigit():
-            CARD = int(line[8:].replace("\n", ""))
-        elif line[:6] == "mixer=" and line[6:].replace("\n", "").isalnum():
-            MIXER = line[6:].replace("\n", "")
+        line_clean = line.replace("\n", "").replace(" ", "")
+        if line_clean[:8] == "card=hw:" and line_clean[8:].isdigit():
+            CARD = int(line_clean[8:])
+        elif line_clean[:6] == "mixer=" and line_clean[6:].isalnum():
+            MIXER = line_clean[6:]
     conf_file.close()
 
 
@@ -896,8 +897,14 @@ if __name__ == "__main__":
                 sys.exit(1)
 
     if DEBUG:
+        #App version
         print("%s %s\n" % (__appdispname__, __version__))
-        print("Python: version %s" % sys.version.replace("\n", ""))
+        #Python version
+        print("==== Python version ====")
+        print(sys.version.replace("\n", ""))
+        print("")
+        #Available modules
+        print("==== Modules ====")
         print("pyAlsaAudio: available")
         if XDG:
             print("Python XDG: available")
@@ -915,6 +922,36 @@ if __name__ == "__main__":
             print("pyNotify: available")
         else:
             print("pyNotify: unavailable")
+        print("")
+        #Cards and mixers
+        print("==== Cards and mixers ====")
+        for card_name in CARD_LIST:
+            info_line = "%s: " % MIXER_LIST[card_name]['pretty_name']
+            for mixer_name in MIXER_LIST[card_name]['mixers']:
+                    info_line += "%s, " % mixer_name
+            print(info_line)
+        print("Selected card: hw:%i" % CARD)
+        print("Selected mixer: %s" % MIXER)
+        print("")
+        #Config file
+        print("==== Config file ====")
+        print("Path: %s" % CONFIG_FILE_PATH)
+        if os.path.isfile(CONFIG_FILE_PATH):
+            print("Exists: True")
+            print("Content:")
+            cf = open(CONFIG_FILE_PATH, "r")
+            for line in cf:
+                print("    %s" % line.replace("\n", ""))
+            cf.close()
+        else:
+            print("Exists: False")
+        print("")
+        #CLI Opts
+        print("==== CLI args ====")
+        info_line = ""
+        for arg in sys.argv:
+            info_line += "%s " % arg
+        print(info_line)
         print("")
 
     #Check CLI options (card and mixer)
