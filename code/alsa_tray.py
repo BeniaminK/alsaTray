@@ -116,6 +116,8 @@ __website__ = "http://software.flogisoft.com/alsa-tray/"
 
 import sys
 import os
+import gettext
+gettext.install(__appname__)
 
 try:
     import alsaaudio
@@ -285,7 +287,7 @@ class ALSATrayConfig(object):
     def __init__(self):
         """The constructor"""
         self.gui = gtk.Builder()
-#        self.gui.set_translation_domain(__appname__)
+        self.gui.set_translation_domain(__appname__)
         self.gui.add_from_file(CONFIG_GUI_PATH)
         self.gui.connect_signals(self)
         self.gui.get_object("win_config").set_icon_from_file(AT_ICON_PATH)
@@ -367,7 +369,7 @@ class ALSATray(object):
         self.window.set_border_width(3)
         self.window.add(self.slider)
         #Menu
-        self.menu_mute = gtk.CheckMenuItem("Mute")
+        self.menu_mute = gtk.CheckMenuItem(_("Mute"))
         #
         menu_separator0 = gtk.MenuItem()
         #
@@ -496,13 +498,17 @@ class ALSATray(object):
         #Tray icon
         if mute:
             icon_index = len(VOL_ICON) - 1
-            self.tray_icon.set_tooltip("Volume: mute")
+            self.tray_icon.set_tooltip(
+                    _("Volume: {VOLUME}, mute").replace("{VOLUME}", "%i%%" % volume)
+                    )
             self.handle_menu_mute = False
             self.menu_mute.set_active(True)
             self.handle_menu_mute = True
         else:
             icon_index = int((100 - volume) * (len(VOL_ICON) - 1) / 100)
-            self.tray_icon.set_tooltip("Volume: %i%%" % volume)
+            self.tray_icon.set_tooltip(
+                    _("Volume: {VOLUME}").replace("{VOLUME}", "%i%%" % volume)
+                    )
             self.handle_menu_mute = False
             self.menu_mute.set_active(False)
             self.handle_menu_mute = True
@@ -990,9 +996,9 @@ if __name__ == "__main__":
             notify(volume, default=False)
         #Print infos
         if mute:
-            print("Volume: %i%%, muted" % volume)
+            print(_("Volume: {VOLUME}, mute").replace("{VOLUME}", "%i%%" % volume))
         else:
-            print("Volume: %i%%" % volume)
+            print(_("Volume: {VOLUME}").replace("{VOLUME}", "%i%%" % volume))
     if GUI or not CLI:
         if not PYGTK:
             print("E: Can't run in systray: pyGTK is not available.")

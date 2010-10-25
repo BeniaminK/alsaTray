@@ -21,6 +21,12 @@ _install() {
 	mkdir -pv "$1"/usr/share/man/man1/
 	cp -v ./man.1 "$1"/usr/share/man/man1/alsa-tray.1
 	gzip --best -f "$1"/usr/share/man/man1/alsa-tray.1
+	#locales
+	for file in `find ./locales -name "*.po"` ; do {
+		l10elang=`echo $file | sed -r 's#./locales/(.*).po#\1#g'`
+		mkdir -pv "$1"/usr/share/locale/$l10elang/LC_MESSAGES/
+		msgfmt "$file" -o "$1"/usr/share/locale/$l10elang/LC_MESSAGES/alsa-tray.mo
+	} done
 }
 
 
@@ -30,6 +36,19 @@ _remove() {
 	rm -rv /usr/share/doc/alsa-tray
 	rm -v /usr/bin/alsa-tray
 	rm -v /usr/share/man/man1/alsa-tray.1.gz
+	find /usr/share/locale/ -name alsa-tray.mo \
+		-exec rm -v '{}' ';'
+}
+
+
+_locale() {
+	#Make the transtation template
+	mkdir -pv ./locales/
+	xgettext -k_ -kN_ -o ./locales/alsa-tray.pot ./code/*.py ./code/*.glade
+	for lcfile in $(find ./locales/ -name "*.po") ; do {
+		echo -n "   * $lcfile"
+		msgmerge --update $lcfile ./locales/alsa-tray.pot
+	} done
 }
 
 
@@ -66,6 +85,14 @@ if [ "$1" == "--install" ] || [ "$1" == "-i" ] ; then {
 	} else {
 		echo "E: Need to be root"
 		exit 1
+	} fi
+} elif [ "$1" == "--locale" ] || [ "$1" == "-l" ] ; then {
+	echo "Extracting strings for the translation template..."
+	if [ -x /usr/bin/xgettext ] ; then {
+		_locale
+	} else {
+		echo "E: Can't find xgettext... gettex is installed ?"
+		exit 3
 	} fi
 } else {
 	echo "Arguments :"
