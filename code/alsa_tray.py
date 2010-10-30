@@ -622,6 +622,7 @@ class ALSATray(object):
         img_logo.set_from_file(AT_ICON_PATH)
         aboutdlg.set_logo(img_logo.get_pixbuf())
         aboutdlg.set_icon_from_file(AT_ICON_PATH)
+        aboutdlg.set_translator_credits(_("translator-credits"))
         aboutdlg.connect("response", self.on_aboutdlg_response)
         aboutdlg.show()
 
