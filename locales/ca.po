@@ -1,0 +1,50 @@
+# Catalan translation for alsa-tray
+# Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
+# This file is distributed under the same license as the alsa-tray package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: alsa-tray\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2010-10-30 13:05+0200\n"
+"PO-Revision-Date: 2010-11-13 15:01+0000\n"
+"Last-Translator: el_libre - http://www.catmidia.cat  "
+"XDDDDDDDDDDDDDDDDDDDDDDDDDDD <el.libre@gmail.com>\n"
+"Language-Team: Catalan <ca@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2010-11-14 05:32+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#: code/alsa_tray.py:372
+msgid "Mute"
+msgstr "Emmudeix"
+
+#: code/alsa_tray.py:502 code/alsa_tray.py:1000
+msgid "Volume: {VOLUME}, mute"
+msgstr "Volum: {VOLUME}, emmudeix"
+
+#: code/alsa_tray.py:510 code/alsa_tray.py:1002
+msgid "Volume: {VOLUME}"
+msgstr "Volum: {VOLUME}"
+
+#: code/alsa_tray.py:625
+msgid "translator-credits"
+msgstr ""
+"Launchpad Contributions:\n"
+"  el_libre - http://www.catmidia.cat  XDDDDDDDDDDDDDDDDDDDDDDDDDDD "
+"https://launchpad.net/~el-libre"
+
+#: code/alsa_tray_config.glade:8
+msgid "Preferences - ALSA Tray"
+msgstr "Preferències - Safata de sistema ALSA"
+
+#: code/alsa_tray_config.glade:26
+msgid "Sound card:"
+msgstr "Targeta de so:"
+
+#: code/alsa_tray_config.glade:37
+msgid "Mixer:"
+msgstr "Mesclador:"
