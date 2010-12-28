@@ -683,7 +683,7 @@ def ls_cards_mixers():
                 }
         for mixer_name in alsaaudio.mixers(CARD_LIST.index(card_name)):
             mixer = alsaaudio.Mixer(control=mixer_name, cardindex=CARD_LIST.index(card_name))
-            if len(mixer.switchcap()) == 1 and mixer.switchcap()[0] in \
+            if len(mixer.switchcap()) > 0 and mixer.switchcap()[0] in \
                ("Playback Mute", "Joined Playback Mute"):
                 try:
                     mixer.getmute()
