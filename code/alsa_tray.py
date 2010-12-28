@@ -200,7 +200,7 @@ class Timer(object):
     """A basic timer.
 
     A basic timer based on gobject.timeout_add.
-   
+
     Methods:
         * start -- start the timer
         * stop -- stop the timer
@@ -311,7 +311,7 @@ class ALSATrayConfig(object):
         self.cbox_mixer.add_attribute(cell_mixer, "text", 0)
         self._set_mixer_list()
         self.enabled = True
-        
+
     def _set_mixer_list(self):
         self.lsst_mixer.clear()
         for mixer_name in MIXER_LIST[CARD_LIST[CARD]]['mixers']:
@@ -551,6 +551,8 @@ class ALSATray(object):
             notify(volume)
         #Set the volume
         mixer.setvolume(volume)
+        #Unmute
+        mixer.setmute(False)
         #Update information
         self._update_infos()
 
@@ -595,8 +597,8 @@ class ALSATray(object):
     def on_slider_value_changed(self, widget):
         if self.window.get_visible():
             mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
-            mixer.setmute(False)
             mixer.setvolume(int(self.slider.get_value()))
+            mixer.setmute(False)
             self._update_infos()
 
     def on_window_focus_out_event(self, widget, event):
@@ -697,7 +699,7 @@ def ls_cards_mixers():
 
 def select_default_card():
     """Select the default card.
-    
+
     Select the first card that haves an usable mixer.
     """
     if len(CARD_LIST) > 0:
@@ -716,7 +718,7 @@ def select_default_mixer(card):
 
     If 'Master' available, select it, else select PCM if available, else
     select the first usable mixer.
-    
+
     Argument:
         * card -- the card index
     """
@@ -735,7 +737,7 @@ def select_default_mixer(card):
 
 def check_card(card):
     """Check if the given card is available
-    
+
     Argument:
         * card -- the card index
 
@@ -750,7 +752,7 @@ def check_card(card):
 
 def check_mixer(mixer_name, card):
     """Check if the given mixer of the given card is available
-    
+
     Argument:
         * mixer_name -- the mixer name
         * card -- the card index
