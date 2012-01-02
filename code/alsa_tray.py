@@ -153,10 +153,10 @@ except ImportError:
 MIXER = "Master"
 CARD = 0 #hw:0
 VOL_ICON = [
-        "audio-volume-high-panel",   # > 66%
-        "audio-volume-medium-panel", # > 33%
-        "audio-volume-low-panel",    # > 0%
-        "audio-volume-muted-panel",  # = 0%
+        "audio-volume-high",   # > 66%
+        "audio-volume-medium", # > 33%
+        "audio-volume-low",    # > 0%
+        "audio-volume-muted",  # = 0%
         ]
 OSD_ICON = [
         "notification-audio-volume-high",   # > 66%
@@ -1011,5 +1011,3 @@ if __name__ == "__main__":
             gtk.main()
         except KeyboardInterrupt:
             sys.exit(0)
-
-
