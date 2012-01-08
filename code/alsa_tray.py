@@ -359,7 +359,7 @@ class ALSATray(object):
         self.slider.set_range(0, 100)
         self.slider.set_increments(1, 10)
         self.slider.set_digits(0)
-        self.slider.set_size_request(-1, 150)
+        self.slider.set_size_request(30, 150)
         self.slider.set_value_pos(gtk.POS_BOTTOM)
         #Window
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -766,7 +766,7 @@ def check_mixer(mixer_name, card):
         return False
 
 
-def chack_all():
+def check_all():
     """Check card and mixer and try do fix misconfiguration"""
     #Check card
     if not check_card(CARD):
@@ -825,7 +825,7 @@ if __name__ == "__main__":
     #Read configuration file
     read_config()
     #Check configuration
-    chack_all()
+    check_all()
     #Parse args
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv)):
@@ -964,7 +964,7 @@ if __name__ == "__main__":
         print("")
 
     #Check CLI options (card and mixer)
-    chack_all()
+    check_all()
 
     if CLI:
         #Mixer
