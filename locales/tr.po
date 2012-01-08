@@ -6,38 +6,41 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: alsa-tray\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2010-10-30 13:05+0200\n"
-"PO-Revision-Date: 2010-10-31 19:45+0000\n"
-"Last-Translator: zeugma <Unknown>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-01-08 14:54+0100\n"
+"PO-Revision-Date: 2011-02-08 17:08+0000\n"
+"Last-Translator: Bekir DURAK <by.jigs4w@gmail.com>\n"
 "Language-Team: Turkish <tr@li.org>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-11-01 05:37+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
+"X-Launchpad-Export-Date: 2011-02-09 06:00+0000\n"
+"X-Generator: Launchpad (build 12177)\n"
 
 #: code/alsa_tray.py:372
 msgid "Mute"
 msgstr "Sessiz"
 
-#: code/alsa_tray.py:502 code/alsa_tray.py:1000
+#: code/alsa_tray.py:502 code/alsa_tray.py:1002
 msgid "Volume: {VOLUME}, mute"
 msgstr "Ses: {VOLUME}, sessiz"
 
-#: code/alsa_tray.py:510 code/alsa_tray.py:1002
+#: code/alsa_tray.py:510 code/alsa_tray.py:1004
 msgid "Volume: {VOLUME}"
 msgstr "Ses: {VOLUME}"
 
-#: code/alsa_tray.py:625
+#: code/alsa_tray.py:627
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Bekir DURAK https://launchpad.net/~by-jigs4w-gmail\n"
+"  Fabien LOISON (FLOZz) https://launchpad.net/~flozz\n"
 "  zeugma https://launchpad.net/~sunder67"
 
 #: code/alsa_tray_config.glade:8
 msgid "Preferences - ALSA Tray"
-msgstr ""
+msgstr "Seçenekler - ALSA Tray"
 
 #: code/alsa_tray_config.glade:26
 msgid "Sound card:"

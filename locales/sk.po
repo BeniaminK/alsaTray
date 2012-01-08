@@ -6,30 +6,31 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: alsa-tray\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2010-10-30 13:05+0200\n"
-"PO-Revision-Date: 2010-12-15 16:35+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-01-08 14:54+0100\n"
+"PO-Revision-Date: 2010-12-28 16:09+0000\n"
 "Last-Translator: Stano Kobella <Stano110@azet.sk>\n"
 "Language-Team: Slovak <sk@li.org>\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-12-16 05:49+0000\n"
+"X-Launchpad-Export-Date: 2010-12-29 05:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: code/alsa_tray.py:372
 msgid "Mute"
 msgstr "Stlmiť"
 
-#: code/alsa_tray.py:502 code/alsa_tray.py:1000
+#: code/alsa_tray.py:502 code/alsa_tray.py:1002
 msgid "Volume: {VOLUME}, mute"
 msgstr "Hlasitosť: {VOLUME}, stlmené"
 
-#: code/alsa_tray.py:510 code/alsa_tray.py:1002
+#: code/alsa_tray.py:510 code/alsa_tray.py:1004
 msgid "Volume: {VOLUME}"
 msgstr "Hlasitosť: {VOLUME}"
 
-#: code/alsa_tray.py:625
+#: code/alsa_tray.py:627
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"

@@ -8,10 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-10-30 13:05+0200\n"
+"POT-Creation-Date: 2012-01-08 14:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,15 +21,15 @@ msgstr ""
 msgid "Mute"
 msgstr ""
 
-#: code/alsa_tray.py:502 code/alsa_tray.py:1000
+#: code/alsa_tray.py:502 code/alsa_tray.py:1002
 msgid "Volume: {VOLUME}, mute"
 msgstr ""
 
-#: code/alsa_tray.py:510 code/alsa_tray.py:1002
+#: code/alsa_tray.py:510 code/alsa_tray.py:1004
 msgid "Volume: {VOLUME}"
 msgstr ""
 
-#: code/alsa_tray.py:625
+#: code/alsa_tray.py:627
 msgid "translator-credits"
 msgstr ""
 

@@ -5,7 +5,7 @@
 ##                                                                        ##
 ## ALSA Tray - provides a tray icon for setting ALSA mixers volume        ##
 ##                                                                        ##
-## Copyright (C) 2010  Fabien Loison (flo@flogisoft.com)                  ##
+## Copyright (C) 2010-2012  Fabien Loison (www.flogisoft.com)             ##
 ##                                                                        ##
 ## This program is free software: you can redistribute it and/or modify   ##
 ## it under the terms of the GNU General Public License as published by   ##
@@ -106,12 +106,12 @@ EXAMPLES:
         alsa-tray +tray +mute 80
 """
 
-__version__ = "0.5"
+__version__ = "0.6"
 __author__ = "Fabien Loison <flo@flogisoft.com>"
-__copyright__ = "Copyright © 2010 Fabien LOISON"
+__copyright__ = "Copyright © 2010-2012 Fabien LOISON"
 __appdispname__ = "ALSA Tray"
 __appname__ = "alsa-tray"
-__website__ = "http://software.flogisoft.com/alsa-tray/"
+__website__ = "http://projects.flogisoft.com/alsa-tray/"
 
 
 import sys

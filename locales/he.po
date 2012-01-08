@@ -1,50 +1,49 @@
-# German translation for alsa-tray
-# Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
+# Hebrew translation for alsa-tray
+# Copyright (c) 2011 Rosetta Contributors and Canonical Ltd 2011
 # This file is distributed under the same license as the alsa-tray package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: alsa-tray\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-01-08 14:54+0100\n"
-"PO-Revision-Date: 2010-12-28 16:06+0000\n"
-"Last-Translator: Launchpad Translations Administrators <rosetta@launchpad."
-"net>\n"
-"Language-Team: German <de@li.org>\n"
-"Language: de\n"
+"PO-Revision-Date: 2011-09-05 14:31+0000\n"
+"Last-Translator: Yaron <sh.yaron@gmail.com>\n"
+"Language-Team: Hebrew <he@li.org>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-12-29 05:52+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
+"X-Launchpad-Export-Date: 2011-09-06 05:03+0000\n"
+"X-Generator: Launchpad (build 13861)\n"
 
 #: code/alsa_tray.py:372
 msgid "Mute"
-msgstr "Stumm"
+msgstr "השתקה"
 
 #: code/alsa_tray.py:502 code/alsa_tray.py:1002
 msgid "Volume: {VOLUME}, mute"
-msgstr "Lautstärke: {VOLUME}, stumm"
+msgstr "עצמת השמע: {VOLUME}, בהשתקה"
 
 #: code/alsa_tray.py:510 code/alsa_tray.py:1004
 msgid "Volume: {VOLUME}"
-msgstr "Lautstärke: {VOLUME}"
+msgstr "עצמת השמע: {VOLUME}"
 
 #: code/alsa_tray.py:627
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Silke Hamann https://launchpad.net/~silkehamann"
+"  Yaron https://launchpad.net/~sh-yaron"
 
 #: code/alsa_tray_config.glade:8
 msgid "Preferences - ALSA Tray"
-msgstr "Einstellungen - ALSA Tray"
+msgstr "העדפות - יישומון ALSA"
 
 #: code/alsa_tray_config.glade:26
 msgid "Sound card:"
-msgstr "Soundkarte:"
+msgstr "כרטיס הקול:"
 
 #: code/alsa_tray_config.glade:37
 msgid "Mixer:"
-msgstr "Mischer:"
+msgstr "מערבל:"

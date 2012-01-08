@@ -6,34 +6,36 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: alsa-tray\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2010-10-30 13:05+0200\n"
-"PO-Revision-Date: 2010-11-07 16:21+0000\n"
-"Last-Translator: Adam Czabara <kolofaza@o2.pl>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-01-08 14:54+0100\n"
+"PO-Revision-Date: 2011-01-06 15:38+0000\n"
+"Last-Translator: loleN <Unknown>\n"
 "Language-Team: Polish <pl@li.org>\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-11-08 05:32+0000\n"
+"X-Launchpad-Export-Date: 2011-01-07 06:09+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: code/alsa_tray.py:372
 msgid "Mute"
-msgstr "Wyciszenie"
+msgstr "Wyciszony"
 
-#: code/alsa_tray.py:502 code/alsa_tray.py:1000
+#: code/alsa_tray.py:502 code/alsa_tray.py:1002
 msgid "Volume: {VOLUME}, mute"
 msgstr "Głośność: {VOLUME}, wyciszenie"
 
-#: code/alsa_tray.py:510 code/alsa_tray.py:1002
+#: code/alsa_tray.py:510 code/alsa_tray.py:1004
 msgid "Volume: {VOLUME}"
 msgstr "Głośność: {VOLUME}"
 
-#: code/alsa_tray.py:625
+#: code/alsa_tray.py:627
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Adam Czabara https://launchpad.net/~adam-czabara"
+"  Adam Czabara https://launchpad.net/~adam-czabara\n"
+"  loleN https://launchpad.net/~lolen"
 
 #: code/alsa_tray_config.glade:8
 msgid "Preferences - ALSA Tray"
