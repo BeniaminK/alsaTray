@@ -684,17 +684,20 @@ def ls_cards_mixers():
                 'pretty_name': "%s (hw:%i)" % (card_name, CARD_LIST.index(card_name)),
                 'mixers': [],
                 }
-        for mixer_name in alsaaudio.mixers(CARD_LIST.index(card_name)):
-            mixer = alsaaudio.Mixer(control=mixer_name, cardindex=CARD_LIST.index(card_name))
-            if len(mixer.switchcap()) > 0 and mixer.switchcap()[0] in \
-               ("Playback Mute", "Joined Playback Mute"):
-                try:
-                    mixer.getmute()
-                    mixer.getvolume()
-                except alsaaudio.ALSAAudioError:
-                    pass
-                else:
-                    MIXER_LIST[card_name]['mixers'].append(mixer_name)
+        try:
+            for mixer_name in alsaaudio.mixers(CARD_LIST.index(card_name)):
+                mixer = alsaaudio.Mixer(control=mixer_name, cardindex=CARD_LIST.index(card_name))
+                if len(mixer.switchcap()) > 0 and mixer.switchcap()[0] in \
+                   ("Playback Mute", "Joined Playback Mute"):
+                    try:
+                        mixer.getmute()
+                        mixer.getvolume()
+                    except alsaaudio.ALSAAudioError:
+                        pass
+                    else:
+                        MIXER_LIST[card_name]['mixers'].append(mixer_name)
+        except alsaaudio.ALSAAudioError:
+            pass
 
 
 def select_default_card():
