@@ -494,7 +494,7 @@ class ALSATray(object):
         #Mixer
         mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         volume = mixer.getvolume()[0]
-        mute = mixer.getmute()[0]
+        mute = get_mute(mixer)
         #Tray icon
         if mute:
             icon_index = len(VOL_ICON) - 1
@@ -552,7 +552,7 @@ class ALSATray(object):
         #Set the volume
         mixer.setvolume(volume)
         #Unmute
-        mixer.setmute(False)
+        set_mute(mixer, False)
         #Update information
         self._update_infos()
 
@@ -560,13 +560,13 @@ class ALSATray(object):
         #Mixer
         mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         #Mute/Unmute
-        if mixer.getmute()[0]:
-            mixer.setmute(False)
+        if get_mute(mixer):
+            set_mute(mixer, False)
         else:
-            mixer.setmute(True)
+            set_mute(mixer, True)
         #Show notification
         if do_notify:
-            if mixer.getmute()[0]:
+            if get_mute(mixer):
                 notify(0)
             else:
                 notify(mixer.getvolume()[0])
@@ -598,7 +598,7 @@ class ALSATray(object):
         if self.window.get_visible():
             mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
             mixer.setvolume(int(self.slider.get_value()))
-            mixer.setmute(False)
+            set_mute(mixer, False)
             self._update_infos()
 
     def on_window_focus_out_event(self, widget, event):
@@ -687,10 +687,9 @@ def ls_cards_mixers():
         try:
             for mixer_name in alsaaudio.mixers(CARD_LIST.index(card_name)):
                 mixer = alsaaudio.Mixer(control=mixer_name, cardindex=CARD_LIST.index(card_name))
-                if len(mixer.switchcap()) > 0 and mixer.switchcap()[0] in \
-                   ("Playback Mute", "Joined Playback Mute"):
+                if len(mixer.volumecap()) > 0 and mixer.volumecap()[0] in \
+                    ("Volume", "Playback Volume", "Joined Playback Volume"):
                     try:
-                        mixer.getmute()
                         mixer.getvolume()
                     except alsaaudio.ALSAAudioError:
                         pass
@@ -820,6 +819,20 @@ def write_config():
         pass
     else:
         conf_file.close()
+
+
+def get_mute(mixer):
+    try:
+        return bool(mixer.getmute()[0])
+    except:
+        return False
+
+
+def set_mute(mixer, value):
+    try:
+        mixer.setmute(value)
+    except:
+        pass
 
 
 if __name__ == "__main__":
@@ -973,7 +986,7 @@ if __name__ == "__main__":
         #Mixer
         mixer = alsaaudio.Mixer(control=MIXER, cardindex=CARD)
         volume = mixer.getvolume()[0]
-        mute = bool(mixer.getmute()[0])
+        mute = get_mute(mixer)
         #Volume
         if CLI_OPTS['volume'][0] == "+":
             volume += int(CLI_OPTS['volume'][1:])
@@ -994,7 +1007,7 @@ if __name__ == "__main__":
             mute = not mute
         #Set
         mixer.setvolume(volume)
-        mixer.setmute(mute)
+        set_mute(mixer, mute)
         #Notify
         if mute:
             notify(0, default=False)
@@ -1005,6 +1018,7 @@ if __name__ == "__main__":
             print(_("Volume: {VOLUME}, mute").replace("{VOLUME}", "%i%%" % volume))
         else:
             print(_("Volume: {VOLUME}").replace("{VOLUME}", "%i%%" % volume))
+
     if GUI or not CLI:
         if not PYGTK:
             print("E: Can't run in systray: pyGTK is not available.")
