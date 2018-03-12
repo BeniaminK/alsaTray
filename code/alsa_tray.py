@@ -106,12 +106,14 @@ EXAMPLES:
         alsa-tray +tray +mute 80
 """
 
-__version__ = "0.6"
-__author__ = "Fabien Loison <flo@flogisoft.com>"
-__copyright__ = "Copyright © 2010-2012 Fabien LOISON"
+__version__ = "0.7"
+__author__ = "Fabien Loison <flo@flogisoft.com>, " \
+             "Beniamin Kalinowski <beniamin.kalinowski@gmail.com"
+__copyright__ = "Copyright © 2010-2012 Fabien LOISON, 2018 Beniamin Kalinowski"
 __appdispname__ = "ALSA Tray"
 __appname__ = "alsa-tray"
-__website__ = "http://projects.flogisoft.com/alsa-tray/"
+__website__ = "http://projects.flogisoft.com/alsa-tray/ (pyGtk)," \
+              "https://github.com/BeniaminK/alsaTray"
 
 
 import sys

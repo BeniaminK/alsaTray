@@ -1,9 +1,10 @@
 ============================================================================
                             A L S A   T R A Y
 ============================================================================
-  WEBSITE:  http://projects.flogisoft.com/alsa-tray/
-  VERSION:  0.6
-  REALISED: Sun, 08 Jan 2012 14:53:16 +0100 
+  WEBSITE (original, pyGtk):  http://projects.flogisoft.com/alsa-tray/
+  WEBSITE (new, GTK+):        https://github.com/BeniaminK/alsaTray/
+  VERSION:  0.7
+  RELEASED: Mon Mar 12 15:57:39 CET 2018
 ============================================================================
 
   ALSA Tray Provides a systray icon and a command line interface for
@@ -16,8 +17,8 @@
                  NOTE: Used for finding the best place for the
                  config file.
 
-    * [Optional] PyGTK 2.x <http://pygtk.org/>
-                 NOTE: PyGTK is optional for using ALSA Tray with CLI, but
+    * [Optional] Python GTK+ 3<https://python-gtk-3-tutorial.readthedocs.io/en/latest/>
+                 NOTE: Python GTK+ 3 is optional for using ALSA Tray with CLI, but
                  it is needed for having a systray icon.
 
     * [Optional] DBus Python <http://cgit.freedesktop.org/dbus/dbus-python/>
