@@ -130,13 +130,14 @@ try:
 except ImportError:
     XDG = False
 try:
-    import gobject
-    import gtk
-    import pygtk
-    pygtk.require("2.0")
-    PYGTK = True
+    import gi
+    gi.require_version("Gtk", "3.0")
+    from gi.repository import Gtk
+    from gi.repository import Gdk
+    from gi.repository import GLib
+    GTK_PLUS = True
 except ImportError:
-    PYGTK = False
+    GTK_PLUS = False
 try:
     import dbus
     from dbus.mainloop.glib import DBusGMainLoop
@@ -235,7 +236,7 @@ class Timer(object):
     def _timer_loop(self):
         """ Main loop """
         if self._enabled:
-            self._timer = gobject.timeout_add(self._interval, self._timer_loop)
+            self._timer = GLib.timeout_add(self._interval, self._timer_loop)
             self._callback(*self._args, **self._kwargs)
 
 
@@ -286,7 +287,7 @@ class ALSATrayConfig(object):
 
     def __init__(self):
         """The constructor"""
-        self.gui = gtk.Builder()
+        self.gui = Gtk.Builder()
         self.gui.set_translation_domain(__appname__)
         self.gui.add_from_file(CONFIG_GUI_PATH)
         self.gui.connect_signals(self)
@@ -294,9 +295,9 @@ class ALSATrayConfig(object):
         self.enabled = False #prevent error when setting the comboboxes
         #Cards
         cbox_card = self.gui.get_object("cbox_card")
-        lsst_card = gtk.ListStore(str)
+        lsst_card = Gtk.ListStore(str)
         cbox_card.set_model(lsst_card)
-        cell_card = gtk.CellRendererText()
+        cell_card = Gtk.CellRendererText()
         cbox_card.pack_start(cell_card, True)
         cbox_card.add_attribute(cell_card, "text", 0)
         for card_name in CARD_LIST:
@@ -304,9 +305,9 @@ class ALSATrayConfig(object):
         cbox_card.set_active(CARD)
         #Mixer
         self.cbox_mixer = self.gui.get_object("cbox_mixer")
-        self.lsst_mixer = gtk.ListStore(str)
+        self.lsst_mixer = Gtk.ListStore(str)
         self.cbox_mixer.set_model(self.lsst_mixer)
-        cell_mixer = gtk.CellRendererText()
+        cell_mixer = Gtk.CellRendererText()
         self.cbox_mixer.pack_start(cell_mixer, True)
         self.cbox_mixer.add_attribute(cell_mixer, "text", 0)
         self._set_mixer_list()
@@ -352,63 +353,63 @@ class ALSATray(object):
         self.handle_menu_mute = True
         #### Widgets ####
         #Tray icon
-        self.tray_icon = gtk.StatusIcon()
+        self.tray_icon = Gtk.StatusIcon()
         #Slider
-        self.slider = gtk.VScale()
+        self.slider = Gtk.VScale()
         self.slider.set_inverted(True)
         self.slider.set_range(0, 100)
         self.slider.set_increments(1, 10)
         self.slider.set_digits(0)
         self.slider.set_size_request(30, 150)
-        self.slider.set_value_pos(gtk.POS_BOTTOM)
+        self.slider.set_value_pos(Gtk.PositionType.BOTTOM)
         #Window
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         self.window.set_decorated(False)
         self.window.set_skip_taskbar_hint(True)
         self.window.set_skip_pager_hint(True)
         self.window.set_border_width(3)
         self.window.add(self.slider)
         #Menu
-        self.menu_mute = gtk.CheckMenuItem(_("Mute"))
+        self.menu_mute = Gtk.CheckMenuItem(label=_("Mute"))
         #
-        menu_separator0 = gtk.MenuItem()
+        menu_separator0 = Gtk.MenuItem()
         #
-        menu_mixer0 = gtk.ImageMenuItem("GNOME ALSA Mixer")
-        menu_mixer0_img = gtk.Image()
+        menu_mixer0 = Gtk.ImageMenuItem(label="GNOME ALSA Mixer")
+        menu_mixer0_img = Gtk.Image()
         menu_mixer0_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer0.set_image(menu_mixer0_img)
         #
-        menu_mixer1 = gtk.ImageMenuItem("ALSA Mixer")
-        menu_mixer1_img = gtk.Image()
+        menu_mixer1 = Gtk.ImageMenuItem(label="ALSA Mixer")
+        menu_mixer1_img = Gtk.Image()
         menu_mixer1_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer1.set_image(menu_mixer1_img)
         #
-        menu_mixer2 = gtk.ImageMenuItem("XFCE4 Mixer")
-        menu_mixer2_img = gtk.Image()
+        menu_mixer2 = Gtk.ImageMenuItem(label="XFCE4 Mixer")
+        menu_mixer2_img = Gtk.Image()
         menu_mixer2_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer2.set_image(menu_mixer2_img)
         #
-        menu_mixer3 = gtk.ImageMenuItem("Gamix")
-        menu_mixer3_img = gtk.Image()
+        menu_mixer3 = Gtk.ImageMenuItem(label="Gamix")
+        menu_mixer3_img = Gtk.Image()
         menu_mixer3_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer3.set_image(menu_mixer3_img)
         #
-        menu_mixer4 = gtk.ImageMenuItem("ALSA Mixer GUI")
-        menu_mixer4_img = gtk.Image()
+        menu_mixer4 = Gtk.ImageMenuItem(label="ALSA Mixer GUI")
+        menu_mixer4_img = Gtk.Image()
         menu_mixer4_img.set_from_file(MIXER_ICON_PATH)
         menu_mixer4.set_image(menu_mixer4_img)
         #
-        menu_separator1 = gtk.MenuItem()
+        menu_separator1 = Gtk.MenuItem()
         #
-        menu_preferences = gtk.ImageMenuItem(gtk.STOCK_PREFERENCES)
+        menu_preferences = Gtk.ImageMenuItem(label=Gtk.STOCK_PREFERENCES)
         #
-        menu_separator2 = gtk.MenuItem()
+        menu_separator2 = Gtk.MenuItem()
         #
-        menu_about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+        menu_about = Gtk.ImageMenuItem(label=Gtk.STOCK_ABOUT)
         #
-        menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        menu_quit = Gtk.ImageMenuItem(label=Gtk.STOCK_QUIT)
         #
-        self.menu = gtk.Menu()
+        self.menu = Gtk.Menu()
         self.menu.append(self.menu_mute)
         self.menu.append(menu_separator0)
         show_separator1 = False
@@ -451,7 +452,7 @@ class ALSATray(object):
         if DBUS:
             try:
                 MMKeys(self)
-            except dbus.exceptions.DBusException, detail:
+            except dbus.exceptions.DBusException as detail:
                 if DEBUG:
                     print("W: Multimedia key support non available:\n%s" % detail)
                 else:
@@ -466,7 +467,7 @@ class ALSATray(object):
         menu_mixer1.connect(
                 "activate",
                 self.on_menu_mixer_activate,
-                "gnome-terminal -x alsamixer &",
+                "terminator -x alsamixer &",
                 )
         menu_mixer2.connect(
                 "activate",
@@ -498,17 +499,20 @@ class ALSATray(object):
         #Tray icon
         if mute:
             icon_index = len(VOL_ICON) - 1
-            self.tray_icon.set_tooltip(
-                    _("Volume: {VOLUME}, mute").replace("{VOLUME}", "%i%%" % volume)
-                    )
+            self.tray_icon.set_has_tooltip(True)
+            self.tray_icon.set_tooltip_text(
+                _("Volume: {VOLUME}, mute").replace("{VOLUME}", "%i%%" % volume)
+            )
             self.handle_menu_mute = False
             self.menu_mute.set_active(True)
             self.handle_menu_mute = True
         else:
             icon_index = int((100 - volume) * (len(VOL_ICON) - 1) / 100)
-            self.tray_icon.set_tooltip(
-                    _("Volume: {VOLUME}").replace("{VOLUME}", "%i%%" % volume)
-                    )
+            self.tray_icon.set_has_tooltip(True)
+            self.tray_icon.set_tooltip_text(
+                _("Volume: {VOLUME}").replace("{VOLUME}", "%i%%" % volume)
+            )
+
             self.handle_menu_mute = False
             self.menu_mute.set_active(False)
             self.handle_menu_mute = True
@@ -517,9 +521,11 @@ class ALSATray(object):
         self.slider.set_value(volume)
 
     def _set_win_position(self):
-        screen, geometry, orient = self.tray_icon.get_geometry()
+        ret, screen, geometry, orient = self.tray_icon.get_geometry()
+        if not ret:
+            print("Location information haven't been set")
         #Calculate window position
-        if orient == gtk.ORIENTATION_HORIZONTAL:
+        if orient == Gtk.Orientation.HORIZONTAL:
             if geometry.y < screen.get_height()/2: #Panel at TOP
                 win_x = geometry.x
                 win_y = geometry.y + geometry.width
@@ -585,14 +591,14 @@ class ALSATray(object):
             self._toggle_mute(False)
 
     def on_tray_icon_scroll_event(self, widget, event):
-        if event.direction == gtk.gdk.SCROLL_UP:
+        if event.direction == Gdk.ScrollDirection.UP:
             self._set_volume(+5, False)
-        elif event.direction == gtk.gdk.SCROLL_DOWN:
+        elif event.direction == Gdk.ScrollDirection.DOWN:
             self._set_volume(-5, False)
 
     def on_tray_icon_popup_menu(self, widget, button, time):
         self.menu.show_all()
-        self.menu.popup(None, None, None, button, time)
+        self.menu.popup(None, None, None, None, button, time)
 
     def on_slider_value_changed(self, widget):
         if self.window.get_visible():
@@ -615,12 +621,12 @@ class ALSATray(object):
         ALSATrayConfig()
 
     def on_menu_about_activate(self, widget):
-        aboutdlg = gtk.AboutDialog()
+        aboutdlg = Gtk.AboutDialog()
         aboutdlg.set_name(__appdispname__)
         aboutdlg.set_version(__version__)
         aboutdlg.set_copyright(__copyright__)
         aboutdlg.set_website(__website__)
-        img_logo = gtk.Image()
+        img_logo = Gtk.Image()
         img_logo.set_from_file(AT_ICON_PATH)
         aboutdlg.set_logo(img_logo.get_pixbuf())
         aboutdlg.set_icon_from_file(AT_ICON_PATH)
@@ -629,7 +635,7 @@ class ALSATray(object):
         aboutdlg.show()
 
     def on_menu_quit_activate(self, widget):
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def on_aboutdlg_response(self, widget, response):
         if response < 0:
@@ -935,7 +941,7 @@ if __name__ == "__main__":
             print("Python XDG: available")
         else:
             print("Python XDG: unavailable")
-        if PYGTK:
+        if GTK_PLUS:
             print("pyGTK: available")
         else:
             print("pyGTK: unavailable")
@@ -1020,11 +1026,11 @@ if __name__ == "__main__":
             print(_("Volume: {VOLUME}").replace("{VOLUME}", "%i%%" % volume))
 
     if GUI or not CLI:
-        if not PYGTK:
+        if not GTK_PLUS:
             print("E: Can't run in systray: pyGTK is not available.")
             sys.exit(5)
         alsa_volume = ALSATray()
         try:
-            gtk.main()
+             Gtk.main()
         except KeyboardInterrupt:
             sys.exit(0)
