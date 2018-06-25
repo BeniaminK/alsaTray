@@ -6,6 +6,7 @@
 ## ALSA Tray - provides a tray icon for setting ALSA mixers volume        ##
 ##                                                                        ##
 ## Copyright (C) 2010-2012  Fabien Loison (www.flogisoft.com)             ##
+## Copyright (C) 2018 Beniamin Kalinowski (beniamin.kalinowski@gmail.com) ##
 ##                                                                        ##
 ## This program is free software: you can redistribute it and/or modify   ##
 ## it under the terms of the GNU General Public License as published by   ##
@@ -189,14 +190,9 @@ else:
             )
 
 
-if "DEVEL" in os.environ:
-    CONFIG_GUI_PATH = "./alsa_tray_config.glade"
-    MIXER_ICON_PATH = "../pixmaps/mixer_icon.png"
-    AT_ICON_PATH = "../pixmaps/alsa-tray_icon.png"
-else:
-    CONFIG_GUI_PATH = "/usr/share/alsa-tray/alsa_tray_config.glade"
-    MIXER_ICON_PATH = "/usr/share/alsa-tray/mixer_icon.png"
-    AT_ICON_PATH = "/usr/share/alsa-tray/alsa-tray_icon.png"
+CONFIG_GUI_PATH = "alsa_tray/alsa_tray_config.glade"
+MIXER_ICON_PATH = "pixmaps/mixer_icon.png"
+AT_ICON_PATH = "pixmaps/alsa-tray_icon.png"
 
 class Timer(object):
 
@@ -379,26 +375,41 @@ class ALSATray(object):
         menu_mixer0 = Gtk.ImageMenuItem(label="GNOME ALSA Mixer")
         menu_mixer0_img = Gtk.Image()
         menu_mixer0_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer0.set_always_show_image(True)
         menu_mixer0.set_image(menu_mixer0_img)
         #
+        menu_mixer_1 = Gtk.MenuItem()
+        menu_mixer_1_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        menu_mixer_1_box.set_homogeneous(False)
+        menu_mixer_1_label = Gtk.Label("ALSA Mixer")
+        menu_mixer_1_img = Gtk.Image()
+        menu_mixer_1_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer_1_box.pack_start(menu_mixer_1_img, False, False, 0)
+        menu_mixer_1_box.pack_start(menu_mixer_1_label, False, False, 0)
+        menu_mixer_1.add(menu_mixer_1_box)
+
         menu_mixer1 = Gtk.ImageMenuItem(label="ALSA Mixer")
         menu_mixer1_img = Gtk.Image()
         menu_mixer1_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer1.set_always_show_image(True)
         menu_mixer1.set_image(menu_mixer1_img)
         #
         menu_mixer2 = Gtk.ImageMenuItem(label="XFCE4 Mixer")
         menu_mixer2_img = Gtk.Image()
         menu_mixer2_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer2.set_always_show_image(True)
         menu_mixer2.set_image(menu_mixer2_img)
         #
         menu_mixer3 = Gtk.ImageMenuItem(label="Gamix")
         menu_mixer3_img = Gtk.Image()
         menu_mixer3_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer3.set_always_show_image(True)
         menu_mixer3.set_image(menu_mixer3_img)
         #
         menu_mixer4 = Gtk.ImageMenuItem(label="ALSA Mixer GUI")
         menu_mixer4_img = Gtk.Image()
         menu_mixer4_img.set_from_file(MIXER_ICON_PATH)
+        menu_mixer4.set_always_show_image(True)
         menu_mixer4.set_image(menu_mixer4_img)
         #
         menu_separator1 = Gtk.MenuItem()
@@ -430,6 +441,7 @@ class ALSATray(object):
         if os.path.isfile("/usr/bin/alsamixer") and \
            os.path.isfile("/usr/bin/gnome-terminal"):
             self.menu.append(menu_mixer1)
+            self.menu.append(menu_mixer_1)
             show_separator1 = True
         if show_separator1:
             self.menu.append(menu_separator1)
@@ -843,7 +855,9 @@ def set_mute(mixer, value):
         pass
 
 
-if __name__ == "__main__":
+def main():
+    global DEBUG, CLI, GUI
+
     #List available cards and mixers
     ls_cards_mixers()
     #Read configuration file
@@ -1036,3 +1050,7 @@ if __name__ == "__main__":
              Gtk.main()
         except KeyboardInterrupt:
             sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+
