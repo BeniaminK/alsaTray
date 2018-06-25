@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-# Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-# To use a consistent encoding
 from codecs import open
 from os import path
 
@@ -23,9 +21,13 @@ def readme():
      with open('README.rst') as f:
          return f.read()
 
+def get_version():
+    from alsa_tray import alsa_tray
+    return alsa_tray.__version__
+
 
 setup(name='ALSATray',
-      version='0.7',
+      version=get_version(),
       description='ALSA Tray - Set the volume of the ALSA Master mixer.',
       long_description= readme(),
       url='https://github.com/BeniaminK/alsaTray',
@@ -64,10 +66,5 @@ setup(name='ALSATray',
             'alsa-tray=alsa_tray.alsa_tray:main',
         ],
     },
-    # include_package_data=True,
-    # package_dir = {'': 'code'},
-    # scripts=["scripts/alsa-tray"],
-    # packages=[],
-    # py_modules=['code'],
 )
 

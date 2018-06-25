@@ -107,7 +107,7 @@ EXAMPLES:
         alsa-tray +tray +mute 80
 """
 
-__version__ = "0.7"
+__version__ = '0.7'
 __author__ = "Fabien Loison <flo@flogisoft.com>, " \
              "Beniamin Kalinowski <beniamin.kalinowski@gmail.com"
 __copyright__ = "Copyright © 2010-2012 Fabien LOISON, 2018 Beniamin Kalinowski"
